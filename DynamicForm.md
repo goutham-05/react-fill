@@ -7,7 +7,7 @@ This guide shows how to use `<DynamicForm />` with your schema.
 ## 📦 Import
 
 ```tsx
-import { DynamicForm } from "react-fill";
+import { DynamicForm } from "@oqlet/react-fill";
 ```
 
 ---

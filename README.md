@@ -29,7 +29,7 @@ Built on [React Hook Form](https://react-hook-form.com/) — battle-tested form 
 ## Installation
 
 ```bash
-npm install react-fill
+npm install @oqlet/react-fill
 # peer dependencies (if not already installed)
 npm install react react-dom react-hook-form
 ```
@@ -39,7 +39,7 @@ npm install react react-dom react-hook-form
 ## Quick Start
 
 ```tsx
-import { DynamicForm, type FormFieldSchema } from "react-fill";
+import { DynamicForm, type FormFieldSchema } from "@oqlet/react-fill";
 
 const schema: FormFieldSchema[] = [
   {
@@ -424,7 +424,7 @@ Access the full React Hook Form API via `formRef` to set values, trigger validat
 
 ```tsx
 import { useRef } from "react";
-import { DynamicForm, type DynamicFormHandle } from "react-fill";
+import { DynamicForm, type DynamicFormHandle } from "@oqlet/react-fill";
 
 function MyPage() {
   const formRef = useRef<DynamicFormHandle>(null);
@@ -558,7 +558,7 @@ Renders as `<fieldset>` / `<legend>` for proper accessibility:
 ## Multi-Step Wizard
 
 ```tsx
-import { FormWizard } from "react-fill";
+import { FormWizard } from "@oqlet/react-fill";
 
 const steps = [
   {

@@ -15,7 +15,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "paths": {
-      "react-fill": ["../src/index.ts"],
+      "@oqlet/react-fill": ["../src/index.ts"],
       "FormEngine": ["../src/FormEngine.tsx"],
       "DynamicForm/*": ["../src/DynamicForm/*"],
       "index": ["../src/index.ts"]

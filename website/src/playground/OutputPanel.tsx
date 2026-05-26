@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
-import { DynamicForm } from "react-fill";
-import type { FormTheme } from "react-fill";
+import { DynamicForm } from "@oqlet/react-fill";
+import type { FormTheme } from "@oqlet/react-fill";
 import type { FieldConfig } from "./types";
 import { generateSchemaCode, generateUsageCode, toFormSchema } from "./codegen";
 
@@ -69,9 +69,9 @@ const THEME_SLOTS: { key: keyof FormTheme; label: string; hint: string }[] = [
 
 function generateThemeCode(theme: Partial<FormTheme>): string {
   const entries = Object.entries(theme).filter(([, v]) => v !== "" && v !== undefined);
-  if (entries.length === 0) return `import type { FormTheme } from "react-fill";\n\nconst theme: FormTheme = {\n  unstyled: true,\n};\n`;
+  if (entries.length === 0) return `import type { FormTheme } from "@oqlet/react-fill";\n\nconst theme: FormTheme = {\n  unstyled: true,\n};\n`;
   const lines = entries.map(([k, v]) => `  ${k}: "${v}",`).join("\n");
-  return `import type { FormTheme } from "react-fill";\n\nconst theme: FormTheme = {\n  unstyled: true,\n${lines}\n};\n`;
+  return `import type { FormTheme } from "@oqlet/react-fill";\n\nconst theme: FormTheme = {\n  unstyled: true,\n${lines}\n};\n`;
 }
 
 const inputCls =

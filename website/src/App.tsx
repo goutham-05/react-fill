@@ -60,7 +60,7 @@ function Navbar({ onPlayground, onDocs }: { onPlayground: () => void; onDocs: ()
             Docs
           </button>
           <a
-            href="https://www.npmjs.com/package/react-fill"
+            href="https://www.npmjs.com/package/@oqlet/react-fill"
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800/80 hover:bg-zinc-700/80 rounded-md transition-all border border-zinc-700/50"
@@ -152,8 +152,8 @@ function Hero({ onPlayground }: { onPlayground: () => void }) {
           style={{ animationDelay: "0.3s" }}
         >
           <span className="text-zinc-600 select-none mr-2">$</span>
-          <span>npm install react-fill</span>
-          <CopyButton text="npm install react-fill" />
+          <span>npm install @oqlet/react-fill</span>
+          <CopyButton text="npm install @oqlet/react-fill" />
         </div>
 
         {/* CTAs */}
@@ -298,8 +298,8 @@ function Features() {
 
 // ─── Theme Showcase ────────────────────────────────────────────────────────────
 
-const TAILWIND_CODE = `import { DynamicForm } from "react-fill";
-import type { FormTheme } from "react-fill";
+const TAILWIND_CODE = `import { DynamicForm } from "@oqlet/react-fill";
+import type { FormTheme } from "@oqlet/react-fill";
 
 const theme: FormTheme = {
   unstyled: true,
@@ -321,8 +321,8 @@ const theme: FormTheme = {
 
 <DynamicForm schema={schema} theme={theme} onSubmit={fn} />`;
 
-const BOOTSTRAP_CODE = `import { DynamicForm } from "react-fill";
-import type { FormTheme } from "react-fill";
+const BOOTSTRAP_CODE = `import { DynamicForm } from "@oqlet/react-fill";
+import type { FormTheme } from "@oqlet/react-fill";
 
 const theme: FormTheme = {
   unstyled: true,
@@ -342,8 +342,8 @@ const theme: FormTheme = {
 
 <DynamicForm schema={schema} theme={theme} onSubmit={fn} />`;
 
-const MUI_CODE = `import { DynamicForm } from "react-fill";
-import type { FormTheme } from "react-fill";
+const MUI_CODE = `import { DynamicForm } from "@oqlet/react-fill";
+import type { FormTheme } from "@oqlet/react-fill";
 
 // No theme needed — use render prop for full MUI control:
 const schema = [
@@ -527,8 +527,8 @@ function tokenize(line: string): { text: string; cls: string }[] {
 
 // ─── How It Works ──────────────────────────────────────────────────────────────
 
-const STEP1 = `import { DynamicForm } from "react-fill";
-import type { FormFieldSchema } from "react-fill";`;
+const STEP1 = `import { DynamicForm } from "@oqlet/react-fill";
+import type { FormFieldSchema } from "@oqlet/react-fill";`;
 
 const STEP2 = `const schema: FormFieldSchema[] = [
   {
@@ -577,7 +577,7 @@ const STEP3 = `export default function MyForm() {
 
 function HowItWorks() {
   const steps = [
-    { n: "01", title: "Install", desc: "Add the package and its peer dependencies.", code: `npm install react-fill\n# react, react-dom, and react-hook-form\n# are peer dependencies`, lang: "bash" },
+    { n: "01", title: "Install", desc: "Add the package and its peer dependencies.", code: `npm install @oqlet/react-fill\n# react, react-dom, and react-hook-form\n# are peer dependencies`, lang: "bash" },
     { n: "02", title: "Define the schema", desc: "Describe your fields as a plain array. No JSX, no component wiring.", code: STEP2, lang: "typescript" },
     { n: "03", title: "Render", desc: "Drop in DynamicForm with your schema and an onSubmit handler. Done.", code: STEP3, lang: "tsx" },
   ];
@@ -655,7 +655,7 @@ function Footer({ onPlayground, onDocs }: { onPlayground: () => void; onDocs: ()
               GitHub
             </a>
             <a
-              href="https://www.npmjs.com/package/react-fill"
+              href="https://www.npmjs.com/package/@oqlet/react-fill"
               target="_blank"
               rel="noreferrer"
               className="hover:text-zinc-300 transition-colors"

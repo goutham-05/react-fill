@@ -1,5 +1,5 @@
 {
-  "name": "react-fill",
+  "name": "@oqlet/react-fill",
   "version": "1.0.0",
   "description": "ReactFill — a schema-driven dynamic form builder for React. CSS-framework agnostic, zero boilerplate.",
   "main": "./dist/index.js",
@@ -56,6 +56,9 @@
   "author": "Goutham Posannapeta",
   "license": "MIT",
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "@storybook/react": "^10.4.0",
     "@storybook/react-vite": "^10.4.0",
