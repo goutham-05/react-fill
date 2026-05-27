@@ -1,6 +1,6 @@
 {
   "name": "@oqlet/react-fill",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "ReactFill — a schema-driven dynamic form builder for React. CSS-framework agnostic, zero boilerplate.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -22,7 +22,7 @@
   "bugs": {
     "url": "https://github.com/goutham-05/react-fill/issues"
   },
-  "homepage": "https://github.com/goutham-05/react-fill#readme",
+  "homepage": "https://www.reactfill.com/",
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",

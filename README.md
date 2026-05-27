@@ -1,5 +1,7 @@
 # ReactFill
 
+[Website](https://www.reactfill.com/) | [GitHub](https://github.com/goutham-05/react-fill) | [npm](https://www.npmjs.com/package/@oqlet/react-fill)
+
 A schema-driven dynamic form builder for React. Pass a JSON array, get a fully functional form — no boilerplate, no repetition, works with any CSS framework.
 
 Built on [React Hook Form](https://react-hook-form.com/) — battle-tested form state, zero re-render overhead.
