@@ -1,0 +1,825 @@
+# @oqlet/react-fill — LLM Reference
+
+Schema-driven React form library. Pass a JSON array of field descriptors → get a fully
+functional, accessible, themed form. Built on react-hook-form. Zero boilerplate.
+
+## Install
+
+```bash
+npm install @oqlet/react-fill
+# peer deps (install if not already present)
+npm install react react-dom react-hook-form
+```
+
+Tested with React 17–19 and react-hook-form ^7.45.
+
+---
+
+## Quick Start
+
+```tsx
+import { DynamicForm } from "@oqlet/react-fill";
+import type { FormFieldSchema } from "@oqlet/react-fill";
+
+const schema: FormFieldSchema[] = [
+  { name: "email",   label: "Email",    type: "email",    required: true },
+  { name: "message", label: "Message",  type: "textarea", rows: 4 },
+];
+
+export default function MyForm() {
+  return (
+    <DynamicForm
+      schema={schema}
+      onSubmit={(data) => console.log(data)}
+    />
+  );
+}
+```
+
+---
+
+## DynamicForm Props
+
+| Prop | Type | Default | Notes |
+|------|------|---------|-------|
+| `schema` | `FormFieldSchema[]` | **required** | Array of field descriptors |
+| `onSubmit` | `(values: TValues) => void \| Promise<void>` | **required** | Called with typed form data on valid submit |
+| `defaultValues` | `Partial<TValues>` | `{}` | Pre-fill field values on mount |
+| `mode` | `"onChange" \| "onBlur" \| "onSubmit" \| "onTouched" \| "all"` | `"onSubmit"` | RHF validation trigger mode |
+| `columns` | `number` | `1` | CSS grid column count for the form layout |
+| `gap` | `string` | `"1rem"` | CSS gap between fields |
+| `maxWidth` | `number \| string` | `undefined` | Max width of the form container |
+| `theme` | `FormTheme` | `undefined` | Global class/style overrides (see Theme section) |
+| `fieldRegistry` | `FieldRegistry` | all 18 types | Custom renderer map for tree-shaking |
+| `formRef` | `React.Ref<DynamicFormHandle>` | `undefined` | Expose the RHF instance externally |
+| `formLabel` | `string` | `undefined` | `aria-label` on the form element |
+| `submitLabel` | `string` | `"Submit"` | Text on the submit button |
+| `hideSubmitButton` | `boolean` | `false` | Hide the built-in submit button |
+| `showReset` | `boolean` | `false` | Render a reset button |
+| `resetLabel` | `string` | `"Reset"` | Text on the reset button |
+| `onReset` | `() => void` | `undefined` | Called when the form is reset |
+| `showErrorSummary` | `boolean` | `false` | Show an error summary banner on failed submit |
+| `errorSummaryTitle` | `string` | `"Please fix the following errors:"` | Banner heading |
+| `errorSummaryClass` | `string` | `undefined` | CSS class on the banner container |
+| `renderSubmitButton` | `(props: SubmitButtonRenderProps) => ReactNode` | `undefined` | Replace built-in submit button entirely |
+| `renderResetButton` | `(props: ResetButtonRenderProps) => ReactNode` | `undefined` | Replace built-in reset button entirely |
+| `submitButtonIcon` | `ReactNode` | `undefined` | Icon left of the submit button label |
+| `resetButtonIcon` | `ReactNode` | `undefined` | Icon left of the reset button label |
+| `extraActions` | `{ label, onClick, type?, style?, className?, icon? }[]` | `[]` | Additional buttons rendered near submit |
+| `formStyle` | `CSSProperties` | `undefined` | Inline style on the `<form>` element |
+| `formClassName` | `string` | `undefined` | CSS class on the `<form>` element |
+| `children` | `ReactNode` | `undefined` | Rendered inside the form after all fields |
+
+### TypeScript generic
+
+```tsx
+type SignupValues = { email: string; plan: "free" | "pro" };
+
+<DynamicForm<SignupValues>
+  schema={schema}
+  onSubmit={(data) => {
+    // data is typed as SignupValues
+    console.log(data.plan); // "free" | "pro"
+  }}
+/>
+```
+
+### Programmatic control via formRef
+
+```tsx
+import { useRef } from "react";
+import { DynamicForm, type DynamicFormHandle } from "@oqlet/react-fill";
+
+const ref = useRef<DynamicFormHandle>(null);
+
+// Access the full RHF instance:
+ref.current?.form.setValue("email", "new@example.com");
+ref.current?.form.trigger("email");
+ref.current?.form.reset();
+const vals = ref.current?.form.getValues();
+```
+
+---
+
+## FormFieldSchema — Complete Property Reference
+
+Every field in the `schema` array is a `FormFieldSchema` object. Only `name`, `label`,
+and `type` are required. All other props are optional.
+
+### Identity
+
+```ts
+name: string          // unique key; becomes the key in submitted data
+label: string         // displayed above the field
+type: FieldType       // determines renderer — see Field Types section
+```
+
+### Value & State
+
+```ts
+defaultValue?: unknown          // pre-fill on mount
+required?: boolean              // triggers required validation
+requiredWhen?: ConditionConfig  // dynamic required (see Conditional Logic)
+disabled?: boolean              // disables the field
+disabledWhen?: ConditionConfig  // dynamic disabled (see Conditional Logic)
+readOnly?: boolean              // value visible, not editable
+placeholder?: string
+```
+
+### Validation
+
+```ts
+showErrorOnBlur?: boolean    // defer error display until blur
+errorText?: string           // static override for all error messages
+getErrorMessage?: (error: any) => string  // derive error message dynamically
+
+validation?: {
+  pattern?:   { value: RegExp; message: string };
+  minLength?: { value: number; message: string };
+  maxLength?: { value: number; message: string };
+  // Cross-field or async validation. Return true = valid, string = error message.
+  validate?: (value: any, formValues?: Record<string, any>) => boolean | string | Promise<boolean | string>;
+  custom?:   (value: any, formValues?: Record<string, any>) => boolean | string | Promise<boolean | string>; // alias of validate
+}
+```
+
+Example — cross-field validation:
+```ts
+{
+  name: "confirmPassword", label: "Confirm Password", type: "text",
+  validation: {
+    validate: (value, formValues) =>
+      value === formValues?.["password"] || "Passwords do not match",
+  }
+}
+```
+
+### Conditional Visibility
+
+```ts
+visibleWhen?: ConditionConfig    // show this field only when conditions pass
+preserveValue?: boolean          // keep stored value when hidden (default: false — value is cleared)
+```
+
+### Layout
+
+```ts
+colSpan?: number     // grid columns to span (requires columns > 1 on DynamicForm)
+fullWidth?: boolean  // span all columns regardless of count
+```
+
+### Input Formatting
+
+```ts
+inputFormatter?: (value: string) => string  // transform on every keystroke; return value is stored
+allowedPattern?: RegExp                     // block keystrokes that don't match
+inputMode?: "text" | "numeric" | "decimal" | "tel" | "email" | "url" | "search"
+```
+
+Phone mask example:
+```ts
+inputFormatter: (v) => {
+  const d = v.replace(/\D/g, "");
+  if (d.length <= 3) return d;
+  if (d.length <= 6) return `${d.slice(0,3)}-${d.slice(3)}`;
+  return `${d.slice(0,3)}-${d.slice(3,6)}-${d.slice(6,10)}`;
+}
+```
+
+### Appearance & UX
+
+```ts
+tooltip?: string           // shown as ? icon with title attribute
+icon?: ReactNode           // node inside the label
+helpText?: string          // supplementary text near the field
+helpTextAlignment?: "underLabel" | "underButton"  // position for radio/checkbox options
+showWordCount?: boolean    // textarea only
+rows?: number              // textarea row count
+inline?: boolean           // radio options in a horizontal row
+```
+
+### Number / Date / Slider
+
+```ts
+min?: number | string
+max?: number | string
+step?: number
+showSliderValue?: boolean  // default: true
+```
+
+### File
+
+```ts
+accept?: string    // e.g. "image/*,.pdf"
+multiple?: boolean
+```
+
+### Rating
+
+```ts
+starCount?: number  // default: 5
+```
+
+### Field Array
+
+```ts
+addButtonLabel?: string     // default: "+ Add"
+removeButtonLabel?: string  // default: "Remove"
+```
+
+### Options (select / radio / checkbox)
+
+```ts
+options?: {
+  label: string;
+  value: string;
+  helpText?: string;
+  disabled?: boolean;
+  icon?: ReactNode;
+  tooltip?: string;
+  helpTextAlignment?: "underLabel" | "underButton";
+}[]
+
+// Async / dependent options:
+getOptions?: (parentValue: any) => { label: string; value: string }[] | Promise<...>
+apiEndpoint?: string   // fetches JSON from URL; querystring built from dependsOn values
+dependsOn?: string | string[]  // field name(s) to watch; value passed to getOptions/apiEndpoint
+```
+
+### Event Handlers
+
+```ts
+onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
+onBlur?:   (e: React.FocusEvent<HTMLInputElement>)  => void
+onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
+onValueChange?: (value: any, { setValue, getValues, trigger }) => void
+onValueChangeDebounced?: (value: any, { setValue, getValues, trigger }) => void | Promise<void>
+debounceMs?: number  // default: 500
+```
+
+### Per-field Styling
+
+```ts
+wrapperClass?: string;  wrapperStyle?: CSSProperties
+labelClass?: string;    labelStyle?: CSSProperties
+inputClass?: string;    inputStyle?: CSSProperties
+errorClass?: string;    errorStyle?: CSSProperties
+helpTextClass?: string; helpTextStyle?: CSSProperties
+checkboxGroupClass?: string; checkBoxGroupStyle?: CSSProperties
+radioGroupClass?: string;    radioGroupStyle?: CSSProperties
+optionWrapperClass?: string; optionWrapperStyle?: CSSProperties
+```
+
+### Group / MultiField
+
+```ts
+// type: "group" — fieldset with nested fields
+children?: FormFieldSchema[]
+layoutClass?: string
+layoutStyle?: CSSProperties
+
+// type: "multiField" — inline horizontal row of sub-fields
+multipleField?: FormFieldSchema[]  // ← "multipleField", not "subFields"
+layoutClass?: string
+layoutStyle?: CSSProperties
+flex?: number | string  // per-sub-field flex sizing, e.g. flex: 3 or flex: "0 0 120px"
+```
+
+### Custom Rendering
+
+```ts
+// Full custom UI — still participates in RHF state and visibleWhen
+render?: ({ name, error, register, defaultValue }) => ReactNode
+
+// Reusable replacement component
+overrideComponent?: React.FC<{ field: FormFieldSchema; name: string; error?: any; register: any }>
+overrideComponentProps?: Record<string, any>
+```
+
+---
+
+## All 18 Field Types
+
+Use the string literal or import `FIELD_TYPES` from `"@oqlet/react-fill"`:
+
+```ts
+import { FIELD_TYPES } from "@oqlet/react-fill";
+// FIELD_TYPES.TEXT, FIELD_TYPES.EMAIL, FIELD_TYPES.SELECT, etc.
+```
+
+| Type | String | Notes |
+|------|--------|-------|
+| Text | `"text"` | Single-line text input |
+| Email | `"email"` | type="email" input |
+| Number | `"number"` | Numeric input; supports `min`, `max`, `step` |
+| Textarea | `"textarea"` | Multi-line; supports `rows`, `showWordCount` |
+| Select | `"select"` | Single-value dropdown; supports `options`, `getOptions`, `apiEndpoint` |
+| Multiselect | `"multiselect"` | Multi-value select; same option props as select |
+| Radio | `"radio"` | Radio button group; supports `options`, `inline` |
+| Checkbox | `"checkbox"` | Single checkbox or grouped checkboxes via `options` |
+| Date | `"date"` | Date picker (`type="date"`); supports `min`, `max` |
+| Time | `"time"` | Time picker (`type="time"`) |
+| Datetime | `"datetime"` | Date + time picker (`type="datetime-local"`) |
+| File | `"file"` | File upload; supports `accept`, `multiple` |
+| Slider | `"slider"` | Range input; supports `min`, `max`, `step`, `showSliderValue` |
+| Rating | `"rating"` | Star rating; supports `starCount` (default: 5) |
+| FieldArray | `"fieldArray"` | Dynamic repeating rows of nested fields via `children` |
+| Group | `"group"` | Fieldset grouping via `children` |
+| MultiField | `"multiField"` | Inline horizontal row of sub-fields via `multipleField` |
+| Additional Email | `"additionalEmail"` | Semantic alias for a second email input |
+
+### Field type examples
+
+```ts
+// Select with static options
+{ name: "role", label: "Role", type: "select",
+  options: [{ label: "Admin", value: "admin" }, { label: "User", value: "user" }] }
+
+// Select with async options dependent on another field
+{ name: "city", label: "City", type: "select",
+  dependsOn: "country",
+  getOptions: async (country) => fetchCities(country) }
+
+// Multiselect
+{ name: "tags", label: "Tags", type: "multiselect",
+  options: [{ label: "React", value: "react" }, { label: "TypeScript", value: "ts" }] }
+
+// Radio inline
+{ name: "plan", label: "Plan", type: "radio", inline: true,
+  options: [{ label: "Free", value: "free" }, { label: "Pro", value: "pro" }] }
+
+// Checkbox group (multiple values)
+{ name: "interests", label: "Interests", type: "checkbox",
+  options: [{ label: "Design", value: "design" }, { label: "Code", value: "code" }] }
+
+// Single checkbox (boolean)
+{ name: "agree", label: "I agree to the terms", type: "checkbox", required: true }
+
+// Slider
+{ name: "volume", label: "Volume", type: "slider", min: 0, max: 100, step: 5, defaultValue: 50 }
+
+// Rating
+{ name: "score", label: "Rating", type: "rating", starCount: 5 }
+
+// File upload
+{ name: "avatar", label: "Avatar", type: "file", accept: "image/*" }
+
+// Textarea with word count
+{ name: "bio", label: "Bio", type: "textarea", rows: 4, showWordCount: true, maxLength: 500 }
+
+// Multi-field row (first name, MI, last name)
+{
+  name: "nameRow", label: "Full Name", type: "multiField",
+  multipleField: [
+    { name: "firstName", label: "First Name", type: "text", flex: 3 },
+    { name: "mi",        label: "M.I.",        type: "text", flex: 0.5 },
+    { name: "lastName",  label: "Last Name",   type: "text", flex: 3 },
+  ]
+}
+
+// Group (fieldset)
+{
+  name: "address", label: "Address", type: "group",
+  children: [
+    { name: "street", label: "Street", type: "text", fullWidth: true },
+    { name: "city",   label: "City",   type: "text" },
+    { name: "zip",    label: "ZIP",    type: "text" },
+  ]
+}
+
+// Dynamic repeating rows
+{
+  name: "contacts", label: "Contacts", type: "fieldArray",
+  addButtonLabel: "+ Add Contact",
+  children: [
+    { name: "name",  label: "Name",  type: "text" },
+    { name: "email", label: "Email", type: "email" },
+  ]
+}
+```
+
+---
+
+## Conditional Logic
+
+`ConditionConfig` is the shared type for `visibleWhen`, `requiredWhen`, and `disabledWhen`.
+The effect differs but the shape is identical.
+
+```ts
+interface ConditionConfig {
+  logic?: "AND" | "OR";  // default: "AND" — all conditions must pass
+  conditions: {
+    field: string;        // dot-path to the controlling field, e.g. "address.country"
+    value?: any | any[];  // expected value; use array for "in"/"notIn"
+    operator?: "equals" | "notEquals" | "in" | "notIn" | "exists" | "notExists";
+    // default operator: "equals"
+  }[];
+}
+```
+
+### visibleWhen — show/hide
+
+```ts
+// Show "companyName" only when role === "business"
+{ name: "companyName", label: "Company", type: "text",
+  visibleWhen: {
+    conditions: [{ field: "role", operator: "equals", value: "business" }]
+  }
+}
+
+// Show when plan is "pro" OR "enterprise"
+{ name: "ssoConfig", label: "SSO Config", type: "text",
+  visibleWhen: {
+    conditions: [{ field: "plan", operator: "in", value: ["pro", "enterprise"] }]
+  }
+}
+
+// Multiple conditions with OR logic
+{ name: "taxId", label: "Tax ID", type: "text",
+  visibleWhen: {
+    logic: "OR",
+    conditions: [
+      { field: "country", operator: "equals", value: "US" },
+      { field: "country", operator: "equals", value: "CA" },
+    ]
+  }
+}
+
+// Keep value when hidden
+{ name: "memo", label: "Memo", type: "text",
+  visibleWhen: { conditions: [{ field: "showMemo", value: true }] },
+  preserveValue: true
+}
+```
+
+### requiredWhen — dynamic required
+
+```ts
+// Require "vatNumber" only when country === "DE"
+{ name: "vatNumber", label: "VAT Number", type: "text",
+  requiredWhen: {
+    conditions: [{ field: "country", operator: "equals", value: "DE" }]
+  }
+}
+```
+
+### disabledWhen — dynamic disabled
+
+```ts
+// Disable "discount" for free plan users
+{ name: "discount", label: "Discount", type: "number",
+  disabledWhen: {
+    conditions: [{ field: "plan", operator: "equals", value: "free" }]
+  }
+}
+```
+
+### Operators reference
+
+| Operator | Passes when |
+|----------|-------------|
+| `"equals"` (default) | `fieldValue === value` |
+| `"notEquals"` | `fieldValue !== value` |
+| `"in"` | `value.includes(fieldValue)` |
+| `"notIn"` | `!value.includes(fieldValue)` |
+| `"exists"` | `fieldValue` is truthy |
+| `"notExists"` | `fieldValue` is falsy |
+
+---
+
+## Async / Dependent Options
+
+```ts
+// Static options — always the same
+{ name: "country", label: "Country", type: "select",
+  options: [{ label: "USA", value: "us" }, { label: "Canada", value: "ca" }] }
+
+// Async — function that returns a promise
+{ name: "city", label: "City", type: "select",
+  dependsOn: "country",
+  getOptions: async (countryValue) => {
+    const res = await fetch(`/api/cities?country=${countryValue}`);
+    return res.json();  // must be { label: string; value: string }[]
+  }
+}
+
+// Async — URL endpoint (library calls fetch internally)
+{ name: "city", label: "City", type: "select",
+  dependsOn: "country",
+  apiEndpoint: "/api/cities"
+  // GET /api/cities?country=<value>
+}
+
+// Multiple dependencies (all values passed as object to getOptions)
+{ name: "suburb", label: "Suburb", type: "select",
+  dependsOn: ["country", "state"],
+  getOptions: async ({ country, state }) => fetchSuburbs(country, state)
+}
+```
+
+---
+
+## Theme System
+
+Pass a `FormTheme` object once — every field picks it up. Per-field props always win.
+
+Precedence: **library defaults → theme styles/classes → per-field styles/classes**
+
+```ts
+import type { FormTheme } from "@oqlet/react-fill";
+
+const theme: FormTheme = {
+  // Strip all built-in inline styles — your CSS framework owns the appearance
+  unstyled: true,
+
+  // Class name slots (24 slots total)
+  wrapperClass: "mb-4",
+  labelClass: "block text-sm font-medium text-gray-700 mb-1",
+  inputClass: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500",
+  inputErrorClass: "border-red-500 focus:ring-red-400",
+  errorClass: "mt-1 text-xs text-red-600",
+  helpTextClass: "mt-1 text-xs text-gray-500",
+  requiredMarkClass: "text-red-500 ml-0.5",
+  radioGroupClass: "flex flex-col gap-2",
+  radioInputClass: "h-4 w-4 accent-blue-600",
+  checkboxGroupClass: "flex flex-col gap-2",
+  checkboxInputClass: "h-4 w-4 accent-blue-600",
+  optionWrapperClass: "flex items-center gap-2 text-sm text-gray-700",
+  groupLayoutClass: "grid grid-cols-2 gap-4",
+  submitButtonClass: "px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-semibold",
+  resetButtonClass: "px-5 py-2 border border-gray-300 rounded-md hover:bg-gray-50",
+  extraButtonClass: "px-4 py-2 border rounded text-sm",
+  // FormWizard-specific
+  wizardClass: "max-w-xl mx-auto p-8 bg-white rounded-2xl shadow",
+  stepperClass: "mb-8",
+  navigationClass: "mt-8 flex gap-4",
+
+  // Theme-level inline styles (per-field *Style props override these)
+  inputStyle: { borderRadius: "8px", height: "42px" },
+  labelStyle: { fontWeight: 600 },
+  wrapperStyle: { marginBottom: "1.25rem" },
+  errorStyle: { color: "#dc2626" },
+  helpTextStyle: { color: "#6b7280" },
+
+  // Swap built-in renderers per field type
+  components: {
+    date: MyCustomDatePicker,   // React.FC<FieldComponentProps>
+    select: MyReactSelectField,
+  },
+};
+
+<DynamicForm schema={schema} theme={theme} onSubmit={fn} />
+```
+
+### Bootstrap example
+
+```ts
+const bootstrapTheme: FormTheme = {
+  unstyled: true,
+  wrapperClass: "mb-3",
+  labelClass: "form-label",
+  inputClass: "form-control",
+  inputErrorClass: "is-invalid",
+  errorClass: "invalid-feedback d-block",
+  helpTextClass: "form-text",
+  radioGroupClass: "d-flex flex-column gap-1",
+  optionWrapperClass: "form-check",
+  checkboxGroupClass: "form-check",
+  requiredMarkClass: "text-danger",
+  submitButtonClass: "btn btn-primary",
+  resetButtonClass: "btn btn-secondary",
+};
+```
+
+---
+
+## FormWizard
+
+Multi-step form wrapper. Each step validates independently before advancing.
+
+```tsx
+import { FormWizard } from "@oqlet/react-fill";
+import type { FormFieldSchema } from "@oqlet/react-fill";
+
+// IMPORTANT: steps use `title` (not `label`) for the step heading
+const steps = [
+  {
+    title: "Personal Info",           // ← "title", not "label"
+    description: "Tell us about you", // optional
+    fields: [                          // ← "fields", not "schema"
+      { name: "firstName", label: "First Name", type: "text", required: true },
+      { name: "lastName",  label: "Last Name",  type: "text", required: true },
+    ] as FormFieldSchema[],
+  },
+  {
+    title: "Contact",
+    fields: [
+      { name: "email", label: "Email", type: "email", required: true },
+      { name: "phone", label: "Phone", type: "text" },
+    ] as FormFieldSchema[],
+  },
+  {
+    title: "Preferences",
+    fields: [
+      { name: "newsletter", label: "Subscribe to newsletter", type: "checkbox" },
+      { name: "theme", label: "Preferred Theme", type: "radio",
+        options: [{ label: "Light", value: "light" }, { label: "Dark", value: "dark" }] },
+    ] as FormFieldSchema[],
+  },
+];
+
+<FormWizard
+  steps={steps}
+  onSubmit={(data) => console.log(data)}  // called after final step submits
+  theme={myTheme}                          // same FormTheme as DynamicForm
+  showProgress                             // optional progress bar
+  onStepChange={(step) => console.log(step)}
+/>
+```
+
+### FormWizard props
+
+| Prop | Type | Notes |
+|------|------|-------|
+| `steps` | `WizardStep[]` | **required** |
+| `onSubmit` | `(values: any) => void` | **required** — called on final step submit |
+| `theme` | `FormTheme` | Same as DynamicForm; `wizardClass`, `stepperClass`, `navigationClass` slots |
+| `fieldRegistry` | `FieldRegistry` | Custom renderer map |
+| `showProgress` | `boolean` | Show a progress bar above the stepper |
+| `onStepChange` | `(step: number) => void` | Called whenever the step changes |
+| `wizardStyle` | `CSSProperties` | Inline style on the outer wrapper |
+| `navigationStyle` | `CSSProperties` | Inline style on the prev/next button row |
+| `progressStyle` | `CSSProperties` | Inline style on the progress bar |
+| `renderProgress` | `(current, total) => ReactNode` | Custom progress renderer |
+| `renderNavigation` | `(helpers) => ReactNode` | Custom prev/next button renderer |
+| `formLabel` | `string` | `aria-label` on the form |
+
+### WizardStep shape
+
+```ts
+interface WizardStep {
+  title?: string;
+  description?: string;
+  fields: FormFieldSchema[];
+  validationMode?: "onChange" | "onBlur" | "onSubmit" | "onTouched";
+}
+```
+
+---
+
+## Field Registry — Tree-shaking
+
+By default, all 18 field types are included. Pass a subset to ship only what you use:
+
+```tsx
+import { DynamicForm } from "@oqlet/react-fill";
+import TextField from "@oqlet/react-fill/FieldTypes/TextField";
+import SelectField from "@oqlet/react-fill/FieldTypes/SelectField";
+import EmailField from "@oqlet/react-fill/FieldTypes/TextField"; // email uses same renderer
+
+const registry = { text: TextField, select: SelectField, email: EmailField };
+
+<DynamicForm schema={schema} fieldRegistry={registry} onSubmit={fn} />
+```
+
+The same `fieldRegistry` prop is available on `<FormWizard>`.
+
+---
+
+## Grid Layout
+
+```tsx
+// 2-column layout with a full-width field
+<DynamicForm
+  schema={[
+    { name: "firstName", label: "First Name", type: "text" },
+    { name: "lastName",  label: "Last Name",  type: "text" },
+    { name: "bio",       label: "Bio",        type: "textarea", fullWidth: true },
+    { name: "city",      label: "City",       type: "text", colSpan: 1 },
+    { name: "country",   label: "Country",    type: "select", colSpan: 1,
+      options: [{ label: "USA", value: "us" }] },
+  ]}
+  columns={2}
+  onSubmit={fn}
+/>
+```
+
+---
+
+## Common Patterns
+
+### Controlled default values
+
+```tsx
+<DynamicForm
+  schema={schema}
+  defaultValues={{ role: "user", newsletter: true }}
+  onSubmit={fn}
+/>
+```
+
+### onBlur-only validation
+
+```tsx
+<DynamicForm schema={schema} mode="onBlur" onSubmit={fn} />
+
+// Or per-field:
+{ name: "email", label: "Email", type: "email", showErrorOnBlur: true }
+```
+
+### Cascading selects (country → state → city)
+
+```ts
+[
+  { name: "country", label: "Country", type: "select",
+    options: [{ label: "USA", value: "us" }, { label: "Canada", value: "ca" }] },
+  { name: "state", label: "State", type: "select",
+    dependsOn: "country",
+    getOptions: (country) => fetchStates(country) },
+  { name: "city", label: "City", type: "select",
+    dependsOn: "state",
+    getOptions: (state) => fetchCities(state) },
+]
+```
+
+### Derived field value (onValueChange)
+
+```ts
+{ name: "price", label: "Price", type: "number",
+  onValueChange: (value, { setValue }) => {
+    setValue("priceWithTax", (Number(value) * 1.1).toFixed(2));
+  }
+}
+```
+
+### Debounced async lookup
+
+```ts
+{ name: "username", label: "Username", type: "text",
+  onValueChangeDebounced: async (value, { setValue, trigger }) => {
+    const taken = await checkUsername(value);
+    if (taken) setValue("usernameError", "Username taken");
+  },
+  debounceMs: 400
+}
+```
+
+### Custom render prop
+
+```ts
+{ name: "avatar", label: "Avatar", type: "text",
+  render: ({ name, register, error }) => (
+    <MyImageUploader {...register(name)} hasError={!!error} />
+  )
+}
+```
+
+---
+
+## Gotchas
+
+1. **`multipleField` not `subFields`** — inline row sub-fields live under `multipleField`, not `subFields`.
+
+2. **FormWizard uses `title` not `label`** — `WizardStep.title` is the step heading. Using `label` silently produces no heading.
+
+3. **FormWizard uses `fields` not `schema`** — `WizardStep.fields: FormFieldSchema[]`. Using `schema` has no effect.
+
+4. **`validate` second param is optional** — signature is `(value: any, formValues?: Record<string, any>)`. Always use optional chaining: `formValues?.["fieldName"]`.
+
+5. **`unstyled: true` only suppresses library defaults** — theme-level `inputStyle`, `labelStyle`, etc. still apply. Set them to `undefined` explicitly if you want no styles at all.
+
+6. **`visibleWhen` clears the value by default** — when a field is hidden, its RHF value resets to `""`. Set `preserveValue: true` to retain it.
+
+7. **`dependsOn` with array passes an object to `getOptions`** — when `dependsOn: ["a", "b"]`, `getOptions` receives `{ a: value, b: value }`, not a single value.
+
+8. **`defaultOperator` is `"equals"`** — you can omit `operator` when checking strict equality.
+
+9. **`colSpan` requires `columns > 1`** on the parent `DynamicForm`. In a 1-column layout `colSpan` has no visible effect.
+
+10. **`inputFormatter` must call `controllerField.onChange(formattedValue)` internally** — the library handles this. Do not construct a synthetic event; just return the transformed string.
+
+11. **`FIELD_TYPES` constants match the string literals exactly** — `FIELD_TYPES.TEXT === "text"`, `FIELD_TYPES.MULTI_FIELD === "multiField"`, etc. Either form is valid in schemas.
+
+12. **`type: "additionalEmail"` renders as `type="email"`** — it is a semantic alias, not a separate visual component. Use it to distinguish a secondary email field in form data.
+
+---
+
+## Exports
+
+```ts
+import {
+  DynamicForm,          // main form component
+  FormWizard,           // multi-step wrapper
+  FIELD_TYPES,          // constants object for all 18 type strings
+  FormThemeContext,     // React context (for custom field components)
+  useFormTheme,         // hook — access current FormTheme inside a custom field
+} from "@oqlet/react-fill";
+
+import type {
+  FormFieldSchema,      // field descriptor type
+  FormTheme,            // theme object type
+  ConditionConfig,      // type for visibleWhen / requiredWhen / disabledWhen
+  DynamicFormHandle,    // ref type (exposes .form: UseFormReturn)
+  FieldRegistry,        // map of fieldType → React component
+} from "@oqlet/react-fill";
+```
