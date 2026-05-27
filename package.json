@@ -56,10 +56,12 @@
   "author": "Goutham Posannapeta",
   "license": "MIT",
   "type": "module",
+  "sideEffects": false,
   "publishConfig": {
     "access": "public"
   },
   "devDependencies": {
+    "@storybook/addon-a11y": "^10.4.1",
     "@storybook/react": "^10.4.0",
     "@storybook/react-vite": "^10.4.0",
     "@testing-library/dom": "^10.4.1",

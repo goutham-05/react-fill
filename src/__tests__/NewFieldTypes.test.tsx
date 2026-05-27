@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import DynamicForm from "../DynamicForm/DynamicForm";
 import type { FormFieldSchema } from "../DynamicForm/types/FormFieldSchema";
+import { FIELD_TYPES } from "../DynamicForm/types/constant";
 
 // ─── Date field ───────────────────────────────────────────────────────────────
 
@@ -11,7 +12,7 @@ describe("DynamicForm — date field", () => {
   it("renders a date input", () => {
     render(
       <DynamicForm
-        schema={[{ name: "dob", label: "Date of Birth", type: "date" }]}
+        schema={[{ name: "dob", label: "Date of Birth", type: FIELD_TYPES.DATE }]}
         onSubmit={vi.fn()}
       />
     );
@@ -22,7 +23,7 @@ describe("DynamicForm — date field", () => {
     render(
       <DynamicForm
         schema={[{
-          name: "dob", label: "DOB", type: "date",
+          name: "dob", label: "DOB", type: FIELD_TYPES.DATE,
           min: "2000-01-01", max: "2024-12-31"
         }]}
         onSubmit={vi.fn()}
@@ -37,7 +38,7 @@ describe("DynamicForm — date field", () => {
     const onSubmit = vi.fn();
     render(
       <DynamicForm
-        schema={[{ name: "dob", label: "DOB", type: "date" }]}
+        schema={[{ name: "dob", label: "DOB", type: FIELD_TYPES.DATE }]}
         onSubmit={onSubmit}
       />
     );
@@ -55,7 +56,7 @@ describe("DynamicForm — date field", () => {
     const onSubmit = vi.fn();
     render(
       <DynamicForm
-        schema={[{ name: "dob", label: "DOB", type: "date", required: true }]}
+        schema={[{ name: "dob", label: "DOB", type: FIELD_TYPES.DATE, required: true }]}
         onSubmit={onSubmit}
       />
     );
@@ -70,7 +71,7 @@ describe("DynamicForm — file field", () => {
   it("renders a Choose file button and 'No file chosen' label", () => {
     render(
       <DynamicForm
-        schema={[{ name: "avatar", label: "Avatar", type: "file" }]}
+        schema={[{ name: "avatar", label: "Avatar", type: FIELD_TYPES.FILE }]}
         onSubmit={vi.fn()}
       />
     );
@@ -81,7 +82,7 @@ describe("DynamicForm — file field", () => {
   it("applies accept attribute to the underlying file input", () => {
     const { container } = render(
       <DynamicForm
-        schema={[{ name: "doc", label: "Document", type: "file", accept: ".pdf,.docx" }]}
+        schema={[{ name: "doc", label: "Document", type: FIELD_TYPES.FILE, accept: ".pdf,.docx" }]}
         onSubmit={vi.fn()}
       />
     );
@@ -92,7 +93,7 @@ describe("DynamicForm — file field", () => {
   it("applies multiple attribute to the underlying file input", () => {
     const { container } = render(
       <DynamicForm
-        schema={[{ name: "docs", label: "Documents", type: "file", multiple: true }]}
+        schema={[{ name: "docs", label: "Documents", type: FIELD_TYPES.FILE, multiple: true }]}
         onSubmit={vi.fn()}
       />
     );
@@ -103,7 +104,7 @@ describe("DynamicForm — file field", () => {
   it("renders the field label", () => {
     render(
       <DynamicForm
-        schema={[{ name: "avatar", label: "Profile Picture", type: "file" }]}
+        schema={[{ name: "avatar", label: "Profile Picture", type: FIELD_TYPES.FILE }]}
         onSubmit={vi.fn()}
       />
     );
@@ -117,7 +118,7 @@ describe("DynamicForm — slider field", () => {
   it("renders a range input", () => {
     render(
       <DynamicForm
-        schema={[{ name: "vol", label: "Volume", type: "slider" }]}
+        schema={[{ name: "vol", label: "Volume", type: FIELD_TYPES.SLIDER }]}
         onSubmit={vi.fn()}
       />
     );
@@ -127,7 +128,7 @@ describe("DynamicForm — slider field", () => {
   it("applies min, max, and step attributes", () => {
     render(
       <DynamicForm
-        schema={[{ name: "vol", label: "Volume", type: "slider", min: 10, max: 90, step: 5 }]}
+        schema={[{ name: "vol", label: "Volume", type: FIELD_TYPES.SLIDER, min: 10, max: 90, step: 5 }]}
         onSubmit={vi.fn()}
       />
     );
@@ -140,7 +141,7 @@ describe("DynamicForm — slider field", () => {
   it("uses defaultValue as the initial slider position", () => {
     render(
       <DynamicForm
-        schema={[{ name: "vol", label: "Volume", type: "slider", min: 0, max: 100, defaultValue: 60 }]}
+        schema={[{ name: "vol", label: "Volume", type: FIELD_TYPES.SLIDER, min: 0, max: 100, defaultValue: 60 }]}
         onSubmit={vi.fn()}
       />
     );
@@ -151,7 +152,7 @@ describe("DynamicForm — slider field", () => {
     const onSubmit = vi.fn();
     render(
       <DynamicForm
-        schema={[{ name: "vol", label: "Volume", type: "slider", min: 0, max: 100 }]}
+        schema={[{ name: "vol", label: "Volume", type: FIELD_TYPES.SLIDER, min: 0, max: 100 }]}
         onSubmit={onSubmit}
       />
     );
@@ -168,7 +169,7 @@ describe("DynamicForm — slider field", () => {
   it("displays min and max labels below the track", () => {
     render(
       <DynamicForm
-        schema={[{ name: "vol", label: "Volume", type: "slider", min: 5, max: 95, defaultValue: 50 }]}
+        schema={[{ name: "vol", label: "Volume", type: FIELD_TYPES.SLIDER, min: 5, max: 95, defaultValue: 50 }]}
         onSubmit={vi.fn()}
       />
     );
@@ -184,7 +185,7 @@ describe("DynamicForm — rating field", () => {
   it("renders the correct number of star buttons", () => {
     render(
       <DynamicForm
-        schema={[{ name: "score", label: "Score", type: "rating", starCount: 5 }]}
+        schema={[{ name: "score", label: "Score", type: FIELD_TYPES.RATING, starCount: 5 }]}
         onSubmit={vi.fn()}
       />
     );
@@ -194,7 +195,7 @@ describe("DynamicForm — rating field", () => {
   it("respects a custom starCount", () => {
     render(
       <DynamicForm
-        schema={[{ name: "score", label: "Score", type: "rating", starCount: 10 }]}
+        schema={[{ name: "score", label: "Score", type: FIELD_TYPES.RATING, starCount: 10 }]}
         onSubmit={vi.fn()}
       />
     );
@@ -205,7 +206,7 @@ describe("DynamicForm — rating field", () => {
     const onSubmit = vi.fn();
     render(
       <DynamicForm
-        schema={[{ name: "score", label: "Score", type: "rating", starCount: 5 }]}
+        schema={[{ name: "score", label: "Score", type: FIELD_TYPES.RATING, starCount: 5 }]}
         onSubmit={onSubmit}
       />
     );
@@ -223,7 +224,7 @@ describe("DynamicForm — rating field", () => {
     const onSubmit = vi.fn();
     render(
       <DynamicForm
-        schema={[{ name: "score", label: "Score", type: "rating", starCount: 5 }]}
+        schema={[{ name: "score", label: "Score", type: FIELD_TYPES.RATING, starCount: 5 }]}
         onSubmit={onSubmit}
       />
     );
@@ -243,7 +244,7 @@ describe("DynamicForm — rating field", () => {
     const onSubmit = vi.fn();
     render(
       <DynamicForm
-        schema={[{ name: "score", label: "Score", type: "rating", starCount: 5, required: true }]}
+        schema={[{ name: "score", label: "Score", type: FIELD_TYPES.RATING, starCount: 5, required: true }]}
         onSubmit={onSubmit}
       />
     );
@@ -258,12 +259,12 @@ describe("DynamicForm — fieldArray", () => {
   const arraySchema: FormFieldSchema[] = [{
     name: "contacts",
     label: "Contacts",
-    type: "fieldArray",
+    type: FIELD_TYPES.FIELD_ARRAY,
     addButtonLabel: "Add contact",
     removeButtonLabel: "Remove",
     children: [
-      { name: "name", label: "Name", type: "text" },
-      { name: "email", label: "Email", type: "email" },
+      { name: "name", label: "Name", type: FIELD_TYPES.TEXT },
+      { name: "email", label: "Email", type: FIELD_TYPES.EMAIL },
     ]
   }];
 
@@ -330,7 +331,7 @@ describe("DynamicForm — async options", () => {
     );
     render(
       <DynamicForm
-        schema={[{ name: "pick", label: "Pick one", type: "select", getOptions }]}
+        schema={[{ name: "pick", label: "Pick one", type: FIELD_TYPES.SELECT, getOptions }]}
         onSubmit={vi.fn()}
       />
     );
@@ -350,7 +351,7 @@ describe("DynamicForm — async options", () => {
     );
     render(
       <DynamicForm
-        schema={[{ name: "ans", label: "Answer", type: "radio", getOptions }]}
+        schema={[{ name: "ans", label: "Answer", type: FIELD_TYPES.RADIO, getOptions }]}
         onSubmit={vi.fn()}
       />
     );
@@ -369,7 +370,7 @@ describe("DynamicForm — async options", () => {
     );
     render(
       <DynamicForm
-        schema={[{ name: "skills", label: "Skills", type: "checkbox", getOptions }]}
+        schema={[{ name: "skills", label: "Skills", type: FIELD_TYPES.CHECKBOX, getOptions }]}
         onSubmit={vi.fn()}
       />
     );
@@ -393,13 +394,13 @@ describe("DynamicForm — async options", () => {
           {
             name: "country",
             label: "Country",
-            type: "select",
+            type: FIELD_TYPES.SELECT,
             options: [
               { label: "US", value: "us" },
               { label: "Canada", value: "canada" },
             ],
           },
-          { name: "state", label: "State", type: "select", dependsOn: "country", getOptions },
+          { name: "state", label: "State", type: FIELD_TYPES.SELECT, dependsOn: "country", getOptions },
         ]}
         onSubmit={vi.fn()}
       />
@@ -424,7 +425,7 @@ describe("DynamicForm — async options", () => {
     const getOptions = vi.fn(() => Promise.reject(new Error("Network error")));
     render(
       <DynamicForm
-        schema={[{ name: "pick", label: "Pick", type: "select", getOptions }]}
+        schema={[{ name: "pick", label: "Pick", type: FIELD_TYPES.SELECT, getOptions }]}
         onSubmit={vi.fn()}
       />
     );
@@ -439,7 +440,7 @@ describe("DynamicForm — async options", () => {
     const getOptions = vi.fn(() => Promise.reject(new Error("fail")));
     render(
       <DynamicForm
-        schema={[{ name: "ans", label: "Answer", type: "radio", getOptions }]}
+        schema={[{ name: "ans", label: "Answer", type: FIELD_TYPES.RADIO, getOptions }]}
         onSubmit={vi.fn()}
       />
     );

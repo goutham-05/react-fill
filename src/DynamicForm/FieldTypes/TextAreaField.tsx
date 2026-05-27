@@ -24,7 +24,7 @@ const TextAreaFieldComponent: React.FC<TextAreaFieldProps> = ({ field, name, err
       pattern: field.validation?.pattern,
       minLength: field.validation?.minLength,
       maxLength: field.validation?.maxLength,
-      validate: field.validation?.custom
+      validate: field.validation?.validate ?? field.validation?.custom
     }
   });
 
@@ -46,12 +46,12 @@ const TextAreaFieldComponent: React.FC<TextAreaFieldProps> = ({ field, name, err
     }
   };
 
-  const wrapperStyle = field.wrapperStyle ?? (isUnstyled ? undefined : { marginBottom: "1rem" });
-  const labelStyle = field.labelStyle ?? (isUnstyled ? undefined : {
+  const wrapperStyle = field.wrapperStyle ?? theme.wrapperStyle ?? (isUnstyled ? undefined : { marginBottom: "1rem" });
+  const labelStyle = field.labelStyle ?? theme.labelStyle ?? (isUnstyled ? undefined : {
     display: "block", marginBottom: "6px", fontWeight: 500, fontSize: "14px", color: "#333"
   });
   const inputStyle: React.CSSProperties = isUnstyled
-    ? (field.inputStyle ?? {})
+    ? { ...theme.inputStyle, ...field.inputStyle }
     : {
         padding: "10px", border: "1px solid",
         borderColor: error ? "#f87171" : "#ccc",
@@ -60,10 +60,11 @@ const TextAreaFieldComponent: React.FC<TextAreaFieldProps> = ({ field, name, err
         boxSizing: "border-box", transition: "border-color 0.2s ease-in-out",
         opacity: field.disabled ? 0.6 : 1,
         cursor: field.disabled ? "not-allowed" : "text",
+        ...theme.inputStyle,
         ...field.inputStyle
       };
-  const helpTextStyle = field.helpTextStyle ?? (isUnstyled ? undefined : { fontSize: "12px", marginTop: "4px", color: "#6b7280" });
-  const errorStyle = field.errorStyle ?? (isUnstyled ? undefined : { color: "#d93025", marginTop: "6px", fontSize: "13px" });
+  const helpTextStyle = field.helpTextStyle ?? theme.helpTextStyle ?? (isUnstyled ? undefined : { fontSize: "12px", marginTop: "4px", color: "#4b5563" });
+  const errorStyle = field.errorStyle ?? theme.errorStyle ?? (isUnstyled ? undefined : { color: "#d93025", marginTop: "6px", fontSize: "13px" });
 
   const value = controllerField.value ?? "";
   const wordCount = value.trim() === "" ? 0 : value.trim().split(/\s+/).length;
@@ -122,7 +123,7 @@ const TextAreaFieldComponent: React.FC<TextAreaFieldProps> = ({ field, name, err
       )}
 
       {(field.maxLength || field.showWordCount) && (
-        <div style={{ fontSize: "12px", marginTop: "4px", textAlign: "right", color: "#9ca3af" }}>
+        <div style={{ fontSize: "12px", marginTop: "4px", textAlign: "right", color: "#4b5563" }}>
           {field.showWordCount && <span>{wordCount} words</span>}
           {field.maxLength && <span> {value.length}/{field.maxLength}</span>}
         </div>

@@ -17,13 +17,13 @@ export default function BuilderCanvas({ fields, selectedId, columns, dispatch }:
   const isEmpty = fields.length === 0;
 
   return (
-    <main className="flex-1 flex flex-col min-w-0 overflow-hidden border-r border-zinc-800">
+    <main className="w-full h-full flex flex-col min-w-0 overflow-hidden">
       {/* Toolbar */}
-      <div className="flex items-center justify-between px-5 h-10 border-b border-zinc-800/60 flex-shrink-0 bg-zinc-950/30">
+      <div className="flex items-center justify-between px-5 h-10 border-b border-gray-200/60 dark:border-zinc-800/60 flex-shrink-0 bg-white/30 dark:bg-zinc-950/30">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-600">Canvas</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-zinc-600">Canvas</span>
           {fields.length > 0 && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-zinc-800 text-zinc-500">
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-zinc-500">
               {fields.length} field{fields.length > 1 ? "s" : ""}
             </span>
           )}
@@ -32,8 +32,8 @@ export default function BuilderCanvas({ fields, selectedId, columns, dispatch }:
         <div className="flex items-center gap-3">
           {/* Columns picker */}
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] text-zinc-600">Cols</span>
-            <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+            <span className="text-[10px] text-gray-500 dark:text-zinc-600">Cols</span>
+            <div className="flex items-center bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-lg overflow-hidden">
               {[1, 2, 3].map((c) => (
                 <button
                   key={c}
@@ -43,7 +43,7 @@ export default function BuilderCanvas({ fields, selectedId, columns, dispatch }:
                     "w-7 h-6 text-[10px] font-semibold transition-colors",
                     columns === c
                       ? "bg-blue-600 text-white"
-                      : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800",
+                      : "text-gray-500 dark:text-zinc-500 hover:text-gray-700 dark:hover:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800",
                   ].join(" ")}
                 >
                   {c}
@@ -55,7 +55,7 @@ export default function BuilderCanvas({ fields, selectedId, columns, dispatch }:
           {fields.length > 0 && (
             <button
               onClick={() => dispatch({ type: "CLEAR" })}
-              className="text-[10px] text-zinc-700 hover:text-red-400 transition-colors px-2 py-1 rounded hover:bg-red-500/10"
+              className="text-[10px] text-gray-400 dark:text-zinc-700 hover:text-red-400 transition-colors px-2 py-1 rounded hover:bg-red-500/10"
             >
               Clear all
             </button>
@@ -76,7 +76,7 @@ export default function BuilderCanvas({ fields, selectedId, columns, dispatch }:
               isEmpty
                 ? isOver
                   ? "border-blue-500/60 bg-blue-500/5"
-                  : "border-zinc-800 bg-transparent"
+                  : "border-gray-200 dark:border-zinc-800 bg-transparent"
                 : isOver
                 ? "border-blue-500/30 bg-blue-500/3"
                 : "border-transparent",
@@ -91,10 +91,10 @@ export default function BuilderCanvas({ fields, selectedId, columns, dispatch }:
                 >
                   ⊞
                 </div>
-                <p className={`text-sm transition-colors ${isOver ? "text-blue-400" : "text-zinc-600"}`}>
+                <p className={`text-sm transition-colors ${isOver ? "text-blue-400" : "text-gray-500 dark:text-zinc-600"}`}>
                   {isOver ? "Release to add field" : "Drop fields here"}
                 </p>
-                <p className="text-xs text-zinc-700 mt-1.5">
+                <p className="text-xs text-gray-400 dark:text-zinc-700 mt-1.5">
                   or click a template on the left to get started
                 </p>
               </div>

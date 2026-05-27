@@ -5,31 +5,35 @@ import { resolveErrorMessage } from "../utils/errorUtils";
 import { useFormTheme, cx } from "../theme/FormTheme";
 import { RequiredMark } from "../utils/RequiredMark";
 
-interface SliderFieldProps {
+interface TimeFieldProps {
   field: FormFieldSchema;
   name: string;
   error?: any;
   register: any;
 }
 
-const SliderFieldComponent: React.FC<SliderFieldProps> = ({ field, name, error }) => {
+/**
+ * Handles both "time" and "datetime" field types.
+ * - type "time"     → <input type="time">
+ * - type "datetime" → <input type="datetime-local">
+ */
+const TimeFieldComponent: React.FC<TimeFieldProps> = ({ field, name, error }) => {
   const { setValue, getValues, trigger, control } = useFormContext();
-  const min = (field.min as number) ?? 0;
-  const max = (field.max as number) ?? 100;
-  const step = field.step ?? 1;
-
   const { field: controllerField } = useController({
     name,
     control,
-    defaultValue: field.defaultValue ?? min,
+    defaultValue: field.defaultValue ?? "",
     rules: {
-      required: field.required
+      required: field.required,
+      validate: field.validation?.validate ?? field.validation?.custom
     }
   });
 
   const theme = useFormTheme();
   const isDarkMode = field.theme === "dark";
   const isUnstyled = theme.unstyled;
+
+  const inputType = field.type === "datetime" ? "datetime-local" : "time";
 
   const wrapperStyle = field.wrapperStyle ?? theme.wrapperStyle ?? (isUnstyled ? undefined : { marginBottom: "1rem" });
   const labelStyle = field.labelStyle ?? theme.labelStyle ?? (isUnstyled ? undefined : {
@@ -40,10 +44,15 @@ const SliderFieldComponent: React.FC<SliderFieldProps> = ({ field, name, error }
   const inputStyle = isUnstyled
     ? { ...theme.inputStyle, ...field.inputStyle }
     : {
-        width: "100%",
-        accentColor: isDarkMode ? "#6366f1" : "#4f46e5",
+        padding: "10px", border: "1px solid",
+        borderColor: error ? "#f87171" : isDarkMode ? "#4b5563" : "#ccc",
+        borderRadius: "6px", fontSize: "14px", width: "100%",
+        backgroundColor: isDarkMode ? "#1f2937" : "#fff",
+        color: isDarkMode ? "#f9fafb" : "#111827",
+        outline: "none", boxSizing: "border-box" as const,
+        transition: "border-color 0.2s ease-in-out",
         opacity: field.disabled ? 0.6 : 1,
-        cursor: field.disabled ? "not-allowed" : "pointer",
+        cursor: field.disabled ? "not-allowed" : "default",
         ...theme.inputStyle,
         ...field.inputStyle
       };
@@ -52,14 +61,6 @@ const SliderFieldComponent: React.FC<SliderFieldProps> = ({ field, name, error }
     color: isDarkMode ? "#9ca3af" : "#4b5563"
   });
   const errorStyle = field.errorStyle ?? theme.errorStyle ?? (isUnstyled ? undefined : { color: "#d93025", marginTop: "6px", fontSize: "13px" });
-
-  const minMaxStyle = isUnstyled
-    ? undefined
-    : {
-        display: "flex", justifyContent: "space-between",
-        fontSize: "12px", marginTop: "4px",
-        color: isDarkMode ? "#9ca3af" : "#4b5563"
-      };
 
   return (
     <div className={cx(theme.wrapperClass, field.wrapperClass)} style={wrapperStyle}>
@@ -71,41 +72,34 @@ const SliderFieldComponent: React.FC<SliderFieldProps> = ({ field, name, error }
         {field.icon && <span>{field.icon}</span>}
         <span title={field.tooltip}>{field.label}</span>
         {field.required && <RequiredMark isUnstyled={isUnstyled} className={theme.requiredMarkClass} />}
-        <span style={isUnstyled ? undefined : {
-          marginLeft: "auto", fontWeight: 600,
-          color: isDarkMode ? "#a5b4fc" : "#4f46e5"
-        }}>
-          {controllerField.value}
-        </span>
       </label>
 
       <input
         id={name}
-        type="range"
-        min={min}
-        max={max}
-        step={step}
+        type={inputType}
+        min={field.min as string | undefined}
+        max={field.max as string | undefined}
+        step={field.step}
         aria-required={field.required}
         aria-invalid={Boolean(error)}
-        aria-valuemin={min}
-        aria-valuemax={max}
-        aria-valuenow={controllerField.value}
         aria-describedby={field.helpText ? `${name}-description` : undefined}
-        value={controllerField.value ?? min}
+        value={controllerField.value ?? ""}
         onChange={(e) => {
-          const value = Number(e.target.value);
-          controllerField.onChange(value);
-          field.onValueChange?.(value, { setValue, getValues, trigger });
+          controllerField.onChange(e);
+          field.onValueChange?.(e.target.value, { setValue, getValues, trigger });
+          if (error && field.showErrorOnBlur) trigger(name);
         }}
-        className={cx(theme.inputClass, field.inputClass)}
+        onBlur={(e) => {
+          controllerField.onBlur();
+          field.onBlur?.(e);
+          if (field.showErrorOnBlur) trigger(name);
+        }}
+        className={cx(theme.inputClass, error ? theme.inputErrorClass : undefined, field.inputClass)}
         style={inputStyle}
         disabled={field.disabled}
+        readOnly={field.readOnly}
+        placeholder={field.placeholder}
       />
-
-      <div style={minMaxStyle}>
-        <span>{min}</span>
-        <span>{max}</span>
-      </div>
 
       {field.helpText && (
         <p
@@ -126,4 +120,4 @@ const SliderFieldComponent: React.FC<SliderFieldProps> = ({ field, name, error }
   );
 };
 
-export default React.memo(SliderFieldComponent);
+export default React.memo(TimeFieldComponent);

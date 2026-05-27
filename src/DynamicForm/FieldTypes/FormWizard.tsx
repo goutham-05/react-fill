@@ -3,6 +3,8 @@ import { useForm, FormProvider } from "react-hook-form";
 import { FormFieldSchema } from "../types/FormFieldSchema";
 import { FieldRenderer } from "index";
 import { FormThemeContext, type FormTheme, cx } from "../theme/FormTheme";
+import { FieldRegistryContext, type FieldRegistry } from "../registry/FieldRegistry";
+import { defaultFieldRegistry } from "../registry/defaultRegistry";
 
 interface WizardStep {
   title?: string;
@@ -16,6 +18,10 @@ interface FormWizardProps {
   onSubmit: (values: any) => void;
   onStepChange?: (currentStep: number) => void;
   theme?: FormTheme;
+  /** Field type → component map. Pass a subset for smaller bundles; defaults to all built-in types. */
+  fieldRegistry?: FieldRegistry;
+  /** Accessible name for the form landmark (aria-label). Recommended when multiple forms are on a page. */
+  formLabel?: string;
   wizardStyle?: React.CSSProperties;
   navigationStyle?: React.CSSProperties;
   progressStyle?: React.CSSProperties;
@@ -38,6 +44,8 @@ const FormWizard: React.FC<FormWizardProps> = ({
   onSubmit,
   onStepChange,
   theme = {},
+  fieldRegistry,
+  formLabel,
   wizardStyle,
   navigationStyle,
   progressStyle,
@@ -79,15 +87,10 @@ const FormWizard: React.FC<FormWizardProps> = ({
 
   const wizardContainerStyle: React.CSSProperties = isUnstyled
     ? { ...wizardStyle }
-    : {
-        background: "#fff", borderRadius: "1rem",
-        boxShadow: "0 4px 24px 0 rgba(30, 41, 59, 0.10)",
-        padding: "2.5rem 2rem 2rem 2rem", maxWidth: 560,
-        margin: "2.5rem auto", minHeight: 420, position: "relative",
-        ...wizardStyle
-      };
+    : { position: "relative", ...wizardStyle };
 
   return (
+    <FieldRegistryContext.Provider value={fieldRegistry ?? defaultFieldRegistry}>
     <FormThemeContext.Provider value={theme}>
       <FormProvider {...methods}>
         <div className={cx(theme.wizardClass)} style={wizardContainerStyle}>
@@ -130,7 +133,7 @@ const FormWizard: React.FC<FormWizardProps> = ({
             </div>
           )}
 
-          <form onSubmit={methods.handleSubmit(onSubmit)} style={{ marginBottom: "0" }} autoComplete="off">
+          <form onSubmit={methods.handleSubmit(onSubmit)} aria-label={formLabel} style={{ marginBottom: "0" }} autoComplete="off">
             <div>
               {steps[currentStep].fields.map((field) => (
                 <FieldRenderer key={field.name} field={field} />
@@ -184,6 +187,7 @@ const FormWizard: React.FC<FormWizardProps> = ({
         </div>
       </FormProvider>
     </FormThemeContext.Provider>
+    </FieldRegistryContext.Provider>
   );
 };
 

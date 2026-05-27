@@ -28,7 +28,7 @@ const RadioFieldComponent: React.FC<RadioFieldProps> = ({ field, name, error }) 
   } = useController({
     name,
     control,
-    rules: { required: field.required }
+    rules: { required: field.required, validate: field.validation?.validate ?? field.validation?.custom }
   });
 
   const handleChange = (value: string, event: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,8 +44,8 @@ const RadioFieldComponent: React.FC<RadioFieldProps> = ({ field, name, error }) 
     }
   };
 
-  const wrapperStyle = field.wrapperStyle ?? (isUnstyled ? undefined : { marginBottom: "1rem" });
-  const labelStyle = field.labelStyle ?? (isUnstyled ? undefined : {
+  const wrapperStyle = field.wrapperStyle ?? theme.wrapperStyle ?? (isUnstyled ? undefined : { marginBottom: "1rem" });
+  const labelStyle = field.labelStyle ?? theme.labelStyle ?? (isUnstyled ? undefined : {
     display: "block", marginBottom: "6px", fontWeight: 500, fontSize: "14px",
     color: isDarkMode ? "#e5e7eb" : "#333"
   });
@@ -60,12 +60,13 @@ const RadioFieldComponent: React.FC<RadioFieldProps> = ({ field, name, error }) 
     width: "16px", height: "16px", accentColor: "#004DB2",
     cursor: field.disabled ? "not-allowed" : "pointer",
     transition: "all 0.2s ease",
+    ...theme.inputStyle,
     ...field.inputStyle
   };
-  const helpTextStyle = field.helpTextStyle ?? (isUnstyled ? undefined : {
-    fontSize: "12px", color: isDarkMode ? "#9ca3af" : "#6b7280", marginTop: "4px"
+  const helpTextStyle = field.helpTextStyle ?? theme.helpTextStyle ?? (isUnstyled ? undefined : {
+    fontSize: "12px", color: isDarkMode ? "#9ca3af" : "#4b5563", marginTop: "4px"
   });
-  const errorStyle = field.errorStyle ?? (isUnstyled ? undefined : { color: "#d93025", marginTop: "6px", fontSize: "13px" });
+  const errorStyle = field.errorStyle ?? theme.errorStyle ?? (isUnstyled ? undefined : { color: "#d93025", marginTop: "6px", fontSize: "13px" });
   const hasError = !!(error || fieldError);
 
   return (
@@ -78,7 +79,7 @@ const RadioFieldComponent: React.FC<RadioFieldProps> = ({ field, name, error }) 
 
       <div className={cx(theme.radioGroupClass, field.radioGroupClass)} style={radioGroupStyle}>
         {loading && (
-          <span style={isUnstyled ? undefined : { fontSize: "13px", color: "#6b7280" }}>
+          <span style={isUnstyled ? undefined : { fontSize: "13px", color: "#4b5563" }}>
             Loading options…
           </span>
         )}
@@ -107,16 +108,18 @@ const RadioFieldComponent: React.FC<RadioFieldProps> = ({ field, name, error }) 
                   checked={isSelected}
                   onChange={(e) => handleChange(e.target.value, e)}
                   onBlur={() => { if (field.showErrorOnBlur) trigger(name); }}
-                  className={cx(theme.inputClass, field.inputClass)}
-                  style={isUnstyled ? field.inputStyle : radioInputStyle}
+                  className={cx(theme.radioInputClass ?? theme.inputClass, field.inputClass)}
+                  style={isUnstyled ? { ...theme.inputStyle, ...field.inputStyle } : radioInputStyle}
                   disabled={field.disabled || option.disabled}
                   aria-describedby={option.helpText ? `${inputId}-desc` : undefined}
                 />
                 <span style={isUnstyled ? undefined : {
+                  display: "inline-flex", alignItems: "center", gap: "6px",
                   fontSize: "14px",
                   fontWeight: isSelected ? 600 : 400,
                   color: isSelected ? "#004DB2" : undefined
                 }}>
+                  {option.icon && <span style={{ flexShrink: 0 }}>{option.icon}</span>}
                   {option.label}
                 </span>
               </label>

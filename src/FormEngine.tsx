@@ -1,22 +1,35 @@
 import React, { useEffect, useMemo } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
-import CheckboxField from "DynamicForm/FieldTypes/CheckboxField";
-import DateField from "DynamicForm/FieldTypes/DateField";
-import FileField from "DynamicForm/FieldTypes/FileField";
-import FieldArrayComponent from "DynamicForm/FieldTypes/FieldArrayField";
-import GroupFieldComponent from "DynamicForm/FieldTypes/GroupField";
-import MultiFieldComponent from "DynamicForm/FieldTypes/MultiField";
-import NumberField from "DynamicForm/FieldTypes/NumberField";
-import RadioField from "DynamicForm/FieldTypes/RadioField";
-import RatingField from "DynamicForm/FieldTypes/RatingField";
-import SelectField from "DynamicForm/FieldTypes/SelectField";
-import SliderField from "DynamicForm/FieldTypes/SliderField";
-import TextAreaField from "DynamicForm/FieldTypes/TextAreaField";
-import TextField from "DynamicForm/FieldTypes/TextField";
-import type { FormFieldSchema } from "DynamicForm/types/FormFieldSchema";
+import type { FormFieldSchema, ConditionConfig } from "DynamicForm/types/FormFieldSchema";
+import { useFormTheme } from "DynamicForm/theme/FormTheme";
+import { useFieldRegistry } from "DynamicForm/registry/FieldRegistry";
 
 const resolveNestedValue = (obj: any, path: string): any =>
   path.split(".").reduce((acc, key) => acc?.[key], obj);
+
+/**
+ * Evaluate a ConditionConfig against a map of current field values.
+ * Shared by visibleWhen, requiredWhen, and disabledWhen.
+ */
+function evaluateConditions(
+  config: ConditionConfig,
+  watchedMap: Record<string, any>
+): boolean {
+  const { conditions, logic = "AND" } = config;
+  const results = conditions.map(({ field, value, operator = "equals" }) => {
+    const currentVal = watchedMap[field];
+    switch (operator) {
+      case "equals":    return currentVal === value;
+      case "notEquals": return currentVal !== value;
+      case "in":        return Array.isArray(value) && value.includes(currentVal);
+      case "notIn":     return Array.isArray(value) && !value.includes(currentVal);
+      case "exists":    return currentVal !== undefined && currentVal !== null && currentVal !== "";
+      case "notExists": return currentVal === undefined || currentVal === null || currentVal === "";
+      default:          return currentVal === value;
+    }
+  });
+  return logic === "AND" ? results.every(Boolean) : results.some(Boolean);
+}
 
 interface Props {
   field: FormFieldSchema;
@@ -25,6 +38,8 @@ interface Props {
 
 const BaseFieldRenderer: React.FC<Props> = ({ field, parentName }) => {
   const { register, formState, control, setValue, getValues } = useFormContext();
+  const theme = useFormTheme();
+  const registry = useFieldRegistry();
 
   const qualifiedFieldName = parentName
     ? `${parentName}.${field.name}`
@@ -32,42 +47,40 @@ const BaseFieldRenderer: React.FC<Props> = ({ field, parentName }) => {
 
   const error = resolveNestedValue(formState.errors, qualifiedFieldName);
 
-  // Collect only the field paths actually needed for condition evaluation.
-  // useMemo with [] deps: visibleWhen is static schema data defined once at module level.
-  const conditionPaths = useMemo(
-    () => field.visibleWhen?.conditions?.map((c) => c.field) ?? [],
+  // Collect every unique field path needed by ALL condition configs (visible/required/disabled).
+  // useMemo with [] deps: schema is static — condition paths never change after mount.
+  const allConditionPaths = useMemo(() => {
+    const paths = new Set<string>();
+    field.visibleWhen?.conditions?.forEach(c => paths.add(c.field));
+    field.requiredWhen?.conditions?.forEach(c => paths.add(c.field));
+    field.disabledWhen?.conditions?.forEach(c => paths.add(c.field));
+    return Array.from(paths);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+  }, []);
+
+  // Single useWatch covers all three condition sets — zero duplicate subscriptions.
+  const watchedValues = useWatch({ control, name: allConditionPaths }) as unknown[];
+
+  // Build a path→value lookup map.
+  const watchedMap = useMemo(
+    () => Object.fromEntries(allConditionPaths.map((p, i) => [p, watchedValues[i]])),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [watchedValues]
   );
 
-  // Subscribe only to the fields relevant to this field's conditions.
-  // When conditionPaths is empty, useWatch returns [] and creates zero subscriptions —
-  // eliminating the previous O(n²) re-render problem for large forms.
-  const watchedValues = useWatch({ control, name: conditionPaths }) as unknown[];
+  const shouldRenderField = field.visibleWhen?.conditions?.length
+    ? evaluateConditions(field.visibleWhen, watchedMap)
+    : true;
 
-  let shouldRenderField = true;
+  const isRequiredByCondition = field.requiredWhen?.conditions?.length
+    ? evaluateConditions(field.requiredWhen, watchedMap)
+    : false;
 
-  if (field.visibleWhen?.conditions?.length) {
-    const { conditions, logic = "AND" } = field.visibleWhen;
+  const isDisabledByCondition = field.disabledWhen?.conditions?.length
+    ? evaluateConditions(field.disabledWhen, watchedMap)
+    : false;
 
-    const results = conditions.map(({ value, operator }, i) => {
-      // watchedValues[i] directly corresponds to conditionPaths[i] — no nested traversal needed
-      const currentVal = watchedValues[i];
-
-      switch (operator) {
-        case "equals":    return currentVal === value;
-        case "notEquals": return currentVal !== value;
-        case "in":        return Array.isArray(value) && value.includes(currentVal);
-        case "notIn":     return Array.isArray(value) && !value.includes(currentVal);
-        case "exists":    return currentVal !== undefined && currentVal !== null && currentVal !== "";
-        case "notExists": return currentVal === undefined || currentVal === null || currentVal === "";
-        default:          return false;
-      }
-    });
-
-    shouldRenderField = logic === "AND" ? results.every(Boolean) : results.some(Boolean);
-  }
-
+  // Clear value when field is hidden (unless preserveValue is set).
   useEffect(() => {
     if (!shouldRenderField && !field.preserveValue) {
       const existing = resolveNestedValue(getValues(), qualifiedFieldName);
@@ -88,12 +101,23 @@ const BaseFieldRenderer: React.FC<Props> = ({ field, parentName }) => {
     });
   }
 
-  if (field.overrideComponent) {
-    const OverrideComponent = field.overrideComponent;
+  // Merge computed required/disabled into the field prop so every built-in renderer
+  // automatically receives the resolved values — no changes needed inside each field.
+  const resolvedField: FormFieldSchema =
+    isRequiredByCondition || isDisabledByCondition
+      ? {
+          ...field,
+          required: field.required || isRequiredByCondition,
+          disabled: field.disabled || isDisabledByCondition,
+        }
+      : field;
+
+  if (resolvedField.overrideComponent) {
+    const OverrideComponent = resolvedField.overrideComponent;
     return (
       <OverrideComponent
-        {...(field.overrideComponentProps ?? {})}
-        field={field}
+        {...(resolvedField.overrideComponentProps ?? {})}
+        field={resolvedField}
         name={qualifiedFieldName}
         error={error}
         register={register}
@@ -101,41 +125,16 @@ const BaseFieldRenderer: React.FC<Props> = ({ field, parentName }) => {
     );
   }
 
-  const sharedFieldProps = { field, name: qualifiedFieldName, error, register };
+  // Lookup order: theme.components (design-system override) → built-in registry
+  const dispatchProps = { field: resolvedField, name: qualifiedFieldName, error, register, parentName };
 
-  switch (field.type) {
-    case "text":
-    case "email":
-      return <TextField {...sharedFieldProps} />;
-    case "number":
-      return <NumberField {...sharedFieldProps} />;
-    case "textarea":
-      return <TextAreaField {...sharedFieldProps} />;
-    case "select":
-      return <SelectField {...sharedFieldProps} />;
-    case "radio":
-      return <RadioField {...sharedFieldProps} />;
-    case "checkbox":
-      return <CheckboxField field={field} name={qualifiedFieldName} register={register} />;
-    case "date":
-      return <DateField {...sharedFieldProps} />;
-    case "file":
-      return <FileField {...sharedFieldProps} />;
-    case "slider":
-      return <SliderField {...sharedFieldProps} />;
-    case "rating":
-      return <RatingField {...sharedFieldProps} />;
-    case "fieldArray":
-      return <FieldArrayComponent {...sharedFieldProps} />;
-    case "group":
-      return <GroupFieldComponent {...sharedFieldProps} />;
-    case "additionalEmail":
-      return <TextField {...sharedFieldProps} field={{ ...field, type: "email" }} />;
-    case "multiField":
-      return <MultiFieldComponent field={field} name={qualifiedFieldName} parentName={parentName} />;
-    default:
-      return null;
-  }
+  const ThemeComponent = theme.components?.[resolvedField.type as string];
+  if (ThemeComponent) return <ThemeComponent {...dispatchProps} />;
+
+  const BuiltIn = registry[resolvedField.type as string];
+  if (BuiltIn) return <BuiltIn {...dispatchProps} />;
+
+  return null;
 };
 
 export default React.memo(BaseFieldRenderer);

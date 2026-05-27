@@ -22,7 +22,7 @@ const SelectFieldComponent: React.FC<SelectFieldProps> = ({ field, name, error }
     name,
     control,
     defaultValue: field.defaultValue ?? "",
-    rules: { required: field.required }
+    rules: { required: field.required, validate: field.validation?.validate ?? field.validation?.custom }
   });
 
   const theme = useFormTheme();
@@ -39,12 +39,12 @@ const SelectFieldComponent: React.FC<SelectFieldProps> = ({ field, name, error }
     if (hasError && field.showErrorOnBlur) trigger(name);
   };
 
-  const wrapperStyle = field.wrapperStyle ?? (isUnstyled ? undefined : { marginBottom: "1rem" });
-  const labelStyle = field.labelStyle ?? (isUnstyled ? undefined : {
+  const wrapperStyle = field.wrapperStyle ?? theme.wrapperStyle ?? (isUnstyled ? undefined : { marginBottom: "1rem" });
+  const labelStyle = field.labelStyle ?? theme.labelStyle ?? (isUnstyled ? undefined : {
     display: "block", marginBottom: "6px", fontWeight: 500, fontSize: "14px", color: "#333"
   });
   const selectStyle = isUnstyled
-    ? field.inputStyle
+    ? { ...theme.inputStyle, ...field.inputStyle }
     : {
         padding: "10px", border: "1px solid",
         borderColor: hasError ? "#f87171" : "#ccc",
@@ -53,10 +53,11 @@ const SelectFieldComponent: React.FC<SelectFieldProps> = ({ field, name, error }
         boxSizing: "border-box" as const,
         appearance: "none" as any, WebkitAppearance: "none" as any, MozAppearance: "none" as any,
         paddingRight: "2rem", cursor: field.disabled ? "not-allowed" : "pointer",
+        ...theme.inputStyle,
         ...field.inputStyle
       };
-  const helpTextStyle = field.helpTextStyle ?? (isUnstyled ? undefined : { fontSize: "12px", marginTop: "4px", color: "#6b7280" });
-  const errorStyle = field.errorStyle ?? (isUnstyled ? undefined : { color: "#d93025", marginTop: "6px", fontSize: "13px" });
+  const helpTextStyle = field.helpTextStyle ?? theme.helpTextStyle ?? (isUnstyled ? undefined : { fontSize: "12px", marginTop: "4px", color: "#4b5563" });
+  const errorStyle = field.errorStyle ?? theme.errorStyle ?? (isUnstyled ? undefined : { color: "#d93025", marginTop: "6px", fontSize: "13px" });
 
   const selectedOption = dynamicOptions.find((opt) => opt.value === controllerField.value);
 
@@ -97,7 +98,7 @@ const SelectFieldComponent: React.FC<SelectFieldProps> = ({ field, name, error }
             style={{
               position: "absolute", right: "0.75rem", top: "50%",
               transform: "translateY(-50%)", pointerEvents: "none",
-              fontSize: "1rem", color: "#6b7280"
+              fontSize: "1rem", color: "#4b5563"
             }}
             aria-hidden="true"
           >

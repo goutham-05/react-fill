@@ -20,7 +20,7 @@ const DateFieldComponent: React.FC<DateFieldProps> = ({ field, name, error }) =>
     defaultValue: field.defaultValue ?? "",
     rules: {
       required: field.required,
-      validate: field.validation?.custom
+      validate: field.validation?.validate ?? field.validation?.custom
     }
   });
 
@@ -28,14 +28,14 @@ const DateFieldComponent: React.FC<DateFieldProps> = ({ field, name, error }) =>
   const isDarkMode = field.theme === "dark";
   const isUnstyled = theme.unstyled;
 
-  const wrapperStyle = field.wrapperStyle ?? (isUnstyled ? undefined : { marginBottom: "1rem" });
-  const labelStyle = field.labelStyle ?? (isUnstyled ? undefined : {
+  const wrapperStyle = field.wrapperStyle ?? theme.wrapperStyle ?? (isUnstyled ? undefined : { marginBottom: "1rem" });
+  const labelStyle = field.labelStyle ?? theme.labelStyle ?? (isUnstyled ? undefined : {
     display: "flex", alignItems: "center", gap: "6px",
     marginBottom: "6px", fontWeight: 500, fontSize: "14px",
     color: isDarkMode ? "#e5e7eb" : "#333"
   });
   const inputStyle = isUnstyled
-    ? field.inputStyle
+    ? { ...theme.inputStyle, ...field.inputStyle }
     : {
         padding: "10px", border: "1px solid",
         borderColor: error ? "#f87171" : isDarkMode ? "#4b5563" : "#ccc",
@@ -46,13 +46,14 @@ const DateFieldComponent: React.FC<DateFieldProps> = ({ field, name, error }) =>
         transition: "border-color 0.2s ease-in-out",
         opacity: field.disabled ? 0.6 : 1,
         cursor: field.disabled ? "not-allowed" : "text",
+        ...theme.inputStyle,
         ...field.inputStyle
       };
-  const helpTextStyle = field.helpTextStyle ?? (isUnstyled ? undefined : {
+  const helpTextStyle = field.helpTextStyle ?? theme.helpTextStyle ?? (isUnstyled ? undefined : {
     fontSize: "12px", marginTop: "4px",
-    color: isDarkMode ? "#9ca3af" : "#6b7280"
+    color: isDarkMode ? "#9ca3af" : "#4b5563"
   });
-  const errorStyle = field.errorStyle ?? (isUnstyled ? undefined : { color: "#d93025", marginTop: "6px", fontSize: "13px" });
+  const errorStyle = field.errorStyle ?? theme.errorStyle ?? (isUnstyled ? undefined : { color: "#d93025", marginTop: "6px", fontSize: "13px" });
 
   return (
     <div className={cx(theme.wrapperClass, field.wrapperClass)} style={wrapperStyle}>

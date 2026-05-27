@@ -1,6 +1,7 @@
 import React, { useCallback } from "react";
 import { useController, useFormContext } from "react-hook-form";
 import type { FormFieldSchema } from "../types/FormFieldSchema";
+import { FIELD_TYPES } from "../types/constant";
 import { useDebounce } from "../utils/useDebounce";
 import { resolveErrorMessage } from "../utils/errorUtils";
 import { useFormTheme, cx } from "../theme/FormTheme";
@@ -24,7 +25,7 @@ const TextFieldComponent: React.FC<TextFieldProps> = ({ field, name, error }) =>
       pattern: field.validation?.pattern,
       minLength: field.validation?.minLength,
       maxLength: field.validation?.maxLength,
-      validate: field.validation?.custom
+      validate: field.validation?.validate ?? field.validation?.custom
     }
   });
 
@@ -61,13 +62,13 @@ const TextFieldComponent: React.FC<TextFieldProps> = ({ field, name, error }) =>
     [field, setValue, getValues, trigger, controllerField, triggerDebounce, error, name]
   );
 
-  const wrapperStyle = field.wrapperStyle ?? (isUnstyled ? undefined : { marginBottom: "1rem" });
-  const labelStyle = field.labelStyle ?? (isUnstyled ? undefined : {
+  const wrapperStyle = field.wrapperStyle ?? theme.wrapperStyle ?? (isUnstyled ? undefined : { marginBottom: "1rem" });
+  const labelStyle = field.labelStyle ?? theme.labelStyle ?? (isUnstyled ? undefined : {
     display: "flex", alignItems: "center", gap: "0.4rem",
     marginBottom: "6px", fontWeight: 500, fontSize: "14px", color: "#333"
   });
   const inputStyle = isUnstyled
-    ? field.inputStyle
+    ? { ...theme.inputStyle, ...field.inputStyle }
     : {
         padding: "10px", border: "1px solid",
         borderColor: error ? "#f87171" : "#ccc",
@@ -76,10 +77,11 @@ const TextFieldComponent: React.FC<TextFieldProps> = ({ field, name, error }) =>
         boxSizing: "border-box" as const, transition: "border-color 0.2s ease-in-out",
         opacity: field.disabled ? 0.6 : 1,
         cursor: field.disabled ? "not-allowed" : "text",
+        ...theme.inputStyle,
         ...field.inputStyle
       };
-  const helpTextStyle = field.helpTextStyle ?? (isUnstyled ? undefined : { fontSize: "12px", marginTop: "4px", color: "#6b7280" });
-  const errorStyle = field.errorStyle ?? (isUnstyled ? undefined : { color: "#d93025", marginTop: "6px", fontSize: "13px" });
+  const helpTextStyle = field.helpTextStyle ?? theme.helpTextStyle ?? (isUnstyled ? undefined : { fontSize: "12px", marginTop: "4px", color: "#4b5563" });
+  const errorStyle = field.errorStyle ?? theme.errorStyle ?? (isUnstyled ? undefined : { color: "#d93025", marginTop: "6px", fontSize: "13px" });
 
   return (
     <div className={cx(theme.wrapperClass, field.wrapperClass)} style={wrapperStyle}>
@@ -105,7 +107,7 @@ const TextFieldComponent: React.FC<TextFieldProps> = ({ field, name, error }) =>
 
       <input
         id={name}
-        type={field.type}
+        type={field.type === FIELD_TYPES.ADDITIONAL_EMAIL ? "email" : field.type}
         placeholder={field.placeholder}
         aria-required={field.required}
         aria-invalid={Boolean(error)}

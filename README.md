@@ -12,10 +12,10 @@ Built on [React Hook Form](https://react-hook-form.com/) — battle-tested form 
 
 - **Schema-driven** — define your entire form as a plain JSON array
 - **CSS-framework agnostic** — works with Tailwind, Bootstrap, MUI, plain CSS, or no CSS at all
-- **15 field types** — text, email, number, textarea, select, radio, checkbox, date, file, slider, rating, fieldArray, group, multiField, wizard
+- **18 field types** — text, email, number, textarea, select, multiselect, radio, checkbox, date, time, datetime, file, slider, rating, fieldArray, group, multiField
 - **Async / dependent options** — `getOptions`, `apiEndpoint`, and `dependsOn` for dynamic select / radio / checkbox
 - **Repeatable field arrays** — add/remove rows with nested field groups
-- **Conditional fields** — show/hide fields with AND/OR logic and 6 operators
+- **Conditional fields** — show/hide, conditionally require, or conditionally disable fields with AND/OR logic and 6 operators
 - **Input formatters** — phone masks, SSN formatting, any per-keystroke transformation
 - **Grid layout** — `columns`, `colSpan`, and `fullWidth` for 1/2/3 column grids
 - **Multi-field rows** — render sub-fields side-by-side in a single row
@@ -23,7 +23,8 @@ Built on [React Hook Form](https://react-hook-form.com/) — battle-tested form 
 - **Programmatic control** — `formRef` exposes the full React Hook Form API
 - **Multi-step wizard** — built-in stepper with per-step validation
 - **Custom rendering** — `render` prop or `overrideComponent` for full UI control
-- **Accessible** — `aria-required`, `aria-invalid`, `aria-describedby`, required asterisk with `aria-hidden`
+- **Tree-shakable** — pass a custom `fieldRegistry` to ship only the field types your project uses
+- **Accessible** — `aria-required`, `aria-invalid`, `aria-describedby`, required asterisk with `aria-hidden`, WCAG AA color contrast
 - **TypeScript-first** — fully typed schema with JSDoc on every prop
 
 ---
@@ -35,6 +36,10 @@ npm install @oqlet/react-fill
 # peer dependencies (if not already installed)
 npm install react react-dom react-hook-form
 ```
+
+> **Compatibility** — tested with React 17–19 and `react-hook-form` 7.45+. The peer dependency range is `^7.0.0`; versions before 7.45 are not actively tested and may lack APIs used internally (`useController`, `useFieldArray`).
+>
+> **Changelog** — see [CHANGELOG.md](./CHANGELOG.md) for a full history of additions and fixes.
 
 ---
 
@@ -96,36 +101,44 @@ export default function App() {
 | `fieldArray`      | Repeatable row group with add/remove             |
 | `group`           | `<fieldset>` wrapping `children[]`               |
 | `multiField`      | Flex row of `multipleField[]` fields             |
+| `multiselect`     | Searchable multi-select with chips               |
+| `time`            | `<input type="time">` with min/max               |
+| `datetime`        | `<input type="datetime-local">` with min/max     |
 | `additionalEmail` | Alias for `type: "email"`                        |
 
 ---
 
 ## DynamicForm Props
 
-| Prop                 | Type                                           | Default       | Description                                               |
-|----------------------|------------------------------------------------|---------------|-----------------------------------------------------------|
-| `schema`             | `FormFieldSchema[]`                            | required      | Field definitions                                         |
-| `onSubmit`           | `(values) => void`                             | required      | Called with validated form values                         |
-| `defaultValues`      | `Record<string, any>`                          | —             | Initial field values                                      |
-| `mode`               | RHF validation mode                            | `"onSubmit"`  | When validation triggers (`"onChange"`, `"onBlur"`, etc.) |
-| `formRef`            | `React.Ref<DynamicFormHandle>`                 | —             | Exposes `{ form: UseFormReturn }` for programmatic control|
-| `theme`              | `FormTheme`                                    | `{}`          | CSS class name slots for every structural element         |
-| `columns`            | `number`                                       | `2` (desktop) | Grid column count                                         |
-| `gap`                | `string`                                       | —             | CSS grid gap override                                     |
-| `maxWidth`           | `number \| string`                             | `800`         | Form max-width                                            |
-| `formStyle`          | `CSSProperties`                                | —             | Inline styles merged onto `<form>`                        |
-| `formClassName`      | `string`                                       | —             | Class name on `<form>`                                    |
-| `submitLabel`        | `string`                                       | `"Submit"`    | Submit button text                                        |
-| `resetLabel`         | `string`                                       | `"Reset"`     | Reset button text                                         |
-| `hideSubmitButton`   | `boolean`                                      | `false`       | Hide the submit button entirely                           |
-| `showReset`          | `boolean`                                      | `false`       | Show a reset button                                       |
-| `onReset`            | `() => void`                                   | —             | Called after form reset                                   |
-| `extraActions`       | `ExtraAction[]`                                | —             | Additional buttons in the action row                      |
-| `children`           | `ReactNode`                                    | —             | Content rendered before the schema fields                 |
-| `renderSubmitButton` | (props: SubmitButtonRenderProps) => ReactNode  | —             | Replace the submit button with a custom component         |
-| `renderResetButton`  | (props: ResetButtonRenderProps) => ReactNode   | —             | Replace the reset button with a custom component          |
-| `submitButtonIcon`   | `ReactNode`                                    | —             | Icon rendered left of the built-in submit button label    |
-| `resetButtonIcon`    | `ReactNode`                                    | —             | Icon rendered left of the built-in reset button label     |
+| Prop                 | Type                                           | Default       | Description                                                                        |
+|----------------------|------------------------------------------------|---------------|------------------------------------------------------------------------------------|
+| `schema`             | `FormFieldSchema[]`                            | required      | Field definitions                                                                  |
+| `onSubmit`           | `(values) => void`                             | required      | Called with validated form values                                                  |
+| `defaultValues`      | `Record<string, any>`                          | —             | Initial field values                                                               |
+| `mode`               | RHF validation mode                            | `"onSubmit"`  | When validation triggers (`"onChange"`, `"onBlur"`, etc.)                          |
+| `formRef`            | `React.Ref<DynamicFormHandle>`                 | —             | Exposes `{ form: UseFormReturn }` for programmatic control                         |
+| `theme`              | `FormTheme`                                    | `{}`          | Global class names, inline style defaults, and component overrides for all fields  |
+| `columns`            | `number`                                       | `2` (desktop) | Grid column count                                                                  |
+| `gap`                | `string`                                       | —             | CSS grid gap override                                                              |
+| `maxWidth`           | `number \| string`                             | —             | Form max-width                                                                     |
+| `formStyle`          | `CSSProperties`                                | —             | Inline styles merged onto `<form>`                                                 |
+| `formClassName`      | `string`                                       | —             | Class name on `<form>`                                                             |
+| `submitLabel`        | `string`                                       | `"Submit"`    | Submit button text                                                                 |
+| `resetLabel`         | `string`                                       | `"Reset"`     | Reset button text                                                                  |
+| `hideSubmitButton`   | `boolean`                                      | `false`       | Hide the submit button entirely                                                    |
+| `showReset`          | `boolean`                                      | `false`       | Show a reset button                                                                |
+| `onReset`            | `() => void`                                   | —             | Called after form reset                                                            |
+| `extraActions`       | `ExtraAction[]`                                | —             | Additional buttons in the action row                                               |
+| `children`           | `ReactNode`                                    | —             | Content rendered before the schema fields                                          |
+| `renderSubmitButton` | (props: SubmitButtonRenderProps) => ReactNode  | —             | Replace the submit button with a custom component                                  |
+| `renderResetButton`  | (props: ResetButtonRenderProps) => ReactNode   | —             | Replace the reset button with a custom component                                   |
+| `submitButtonIcon`   | `ReactNode`                                    | —             | Icon rendered left of the built-in submit button label                             |
+| `resetButtonIcon`    | `ReactNode`                                    | —             | Icon rendered left of the built-in reset button label                              |
+| `fieldRegistry`      | `FieldRegistry`                                | all built-ins | Map of field type → component; pass a subset to tree-shake unused field types      |
+| `formLabel`          | `string`                                       | —             | `aria-label` on the `<form>` element — recommended when multiple forms are on page |
+| `showErrorSummary`   | `boolean`                                      | `false`       | Show a validation error banner above the submit button after a failed submit       |
+| `errorSummaryTitle`  | `string`                                       | —             | Banner heading text (default: `"Please fix the following errors:"`)                |
+| `errorSummaryClass`  | `string`                                       | —             | Class name on the error summary container                                          |
 
 ---
 
@@ -154,7 +167,8 @@ type FormFieldSchema = {
     minLength?: { value: number; message: string };
     maxLength?: { value: number; message: string };
     pattern?:   { value: RegExp; message: string };
-    custom?:    (value: any, allValues: any) => string | boolean | undefined;
+    validate?:  (value: any, allValues: any) => string | boolean | undefined;
+    custom?:    (value: any, allValues: any) => string | boolean | undefined; // deprecated alias for validate
   };
 
   // Error messages
@@ -167,7 +181,7 @@ type FormFieldSchema = {
   // Async / dependent options (select / radio / checkbox)
   getOptions?: (parentValue: any) => Option[] | Promise<Option[]>;
   apiEndpoint?: string;   // GET url; ?{dependsOn}={value} appended automatically
-  dependsOn?: string;     // field name whose value is passed to getOptions / apiEndpoint
+  dependsOn?: string | string[];  // field name(s) whose value(s) are passed to getOptions / apiEndpoint
 
   // Date field
   min?: string;           // "YYYY-MM-DD"
@@ -192,7 +206,7 @@ type FormFieldSchema = {
   removeButtonLabel?: string;
   children?: FormFieldSchema[];  // also used for group field
 
-  // Conditional visibility
+  // Conditional visibility / required / disabled — all share the same ConditionConfig shape
   visibleWhen?: {
     logic?: "AND" | "OR";   // default: "AND"
     conditions: Array<{
@@ -200,6 +214,14 @@ type FormFieldSchema = {
       operator: "equals" | "notEquals" | "in" | "notIn" | "exists" | "notExists";
       value?: any;
     }>;
+  };
+  requiredWhen?: {          // mark field required when condition(s) are met
+    logic?: "AND" | "OR";
+    conditions: Array<{ field: string; operator?: string; value?: any }>;
+  };
+  disabledWhen?: {          // disable field when condition(s) are met
+    logic?: "AND" | "OR";
+    conditions: Array<{ field: string; operator?: string; value?: any }>;
   };
   preserveValue?: boolean; // don't clear value when field is hidden
 
@@ -231,9 +253,15 @@ type FormFieldSchema = {
 
 ## CSS Framework Agnostic — FormTheme
 
-`FormTheme` is a context object with CSS class name **slots** for every structural element. Pass it as the `theme` prop on `DynamicForm` and the library wires all slots to the right elements automatically.
+`FormTheme` gives you three independent controls, all applied from one place:
 
-Set `unstyled: true` to strip all default inline styles so your CSS framework owns everything.
+- **Class name slots** — wire your CSS framework's class names to every structural element
+- **Inline style defaults** — set `inputStyle`, `labelStyle`, etc. once at the theme level instead of repeating them on every field schema
+- **Component registry** — swap out built-in field renderers for your own components by field type
+
+Pass it as the `theme` prop on `DynamicForm` and every field inherits it automatically.
+
+Set `unstyled: true` to strip all library-default inline styles so your CSS framework owns everything. Theme-level `*Style` props still apply — they are consumer intent, not library defaults.
 
 ### Tailwind CSS
 
@@ -300,6 +328,116 @@ const bootstrapTheme: FormTheme = {
 | `navigationClass`    | Prev/Next navigation row                      |
 | `unstyled`           | `true` — strips all default inline styles     |
 
+### Theme-level inline styles
+
+Set design-system tokens once at the theme level — every field inherits them without per-field repetition.
+
+**Priority order (lowest → highest):** library defaults → theme styles → per-field styles
+
+| Style prop       | Applies to                                 |
+|------------------|--------------------------------------------|
+| `inputStyle`     | Every `<input>`, `<textarea>`, `<select>`  |
+| `labelStyle`     | Every field label                          |
+| `wrapperStyle`   | Every field's outer wrapper `<div>`        |
+| `errorStyle`     | Every error message element                |
+| `helpTextStyle`  | Every help text element                    |
+
+```tsx
+// Apply a design system's input spec once — all fields inherit it
+<DynamicForm
+  theme={{
+    inputStyle: {
+      borderWidth: "1.5px",
+      borderColor: "#6B748E",
+      borderRadius: "8px",
+      height: "48px",
+      padding: "12px 16px",
+    },
+    labelStyle: { fontWeight: 600, fontSize: "16px", color: "#000" },
+  }}
+  schema={schema}
+  onSubmit={handleSubmit}
+/>
+```
+
+A per-field `inputStyle` is merged on top, so individual fields can still override specific properties.
+
+### Component registry — theme.components
+
+Replace any built-in field renderer with your own component, keyed by field type. The theme-level registry applies to every field of that type — no per-field `overrideComponent` boilerplate required.
+
+```tsx
+// Swap every `date` field for a custom date picker and every `select`
+// for react-select, without touching individual field schemas:
+<DynamicForm
+  theme={{
+    components: {
+      date:   MyDatePickerField,
+      select: MyReactSelectField,
+    }
+  }}
+  schema={schema}
+  onSubmit={handleSubmit}
+/>
+```
+
+Your component receives the same props as any built-in renderer: `{ field, name, error, register }`.
+
+Priority: `field.overrideComponent` > `theme.components[type]` > built-in renderer.
+
+---
+
+## Tree-shaking — fieldRegistry
+
+By default `<DynamicForm>` ships all 18 built-in field types. If you only use a subset, pass a custom `fieldRegistry` and your bundler will drop the rest.
+
+```tsx
+import {
+  DynamicForm,
+  TextField,
+  SelectField,
+  CheckboxField,
+  type FieldRegistry,
+} from "@oqlet/react-fill";
+
+const registry: FieldRegistry = {
+  text:     TextField,
+  email:    TextField,  // reuse — same component
+  select:   SelectField,
+  checkbox: CheckboxField,
+};
+
+<DynamicForm
+  fieldRegistry={registry}
+  schema={schema}
+  onSubmit={handleSubmit}
+/>
+```
+
+The same `fieldRegistry` prop is available on `<FormWizard>`.
+
+Available named exports for individual field components:
+
+| Export             | Field types it covers                |
+|--------------------|--------------------------------------|
+| `TextField`        | `text`, `email`, `additionalEmail`   |
+| `NumberField`      | `number`                             |
+| `TextAreaField`    | `textarea`                           |
+| `SelectField`      | `select`                             |
+| `RadioField`       | `radio`                              |
+| `CheckboxField`    | `checkbox`                           |
+| `DateField`        | `date`                               |
+| `FileField`        | `file`                               |
+| `SliderField`      | `slider`                             |
+| `RatingField`      | `rating`                             |
+| `FieldArrayField`  | `fieldArray`                         |
+| `GroupField`       | `group`                              |
+| `MultiField`       | `multiField`                         |
+| `MultiSelectField` | `multiselect`                        |
+| `TimeField`        | `time`, `datetime`                   |
+
+`defaultFieldRegistry` (all 18 types) and `FieldRegistryContext` are also exported for advanced use cases such as wrapping `FieldRenderer` directly.
+
 ---
 
 ## Conditional Fields — visibleWhen
@@ -354,6 +492,36 @@ const schema: FormFieldSchema[] = [
 
 When a hidden field disappears, its value is cleared automatically (set to `defaultValue ?? ""`). Set `preserveValue: true` to keep the value.
 
+### requiredWhen — make a field conditionally required
+
+```tsx
+{
+  name: "billingName",
+  label: "Billing Name",
+  type: "text",
+  requiredWhen: {
+    conditions: [{ field: "plan", operator: "equals", value: "paid" }]
+  }
+}
+```
+
+The required asterisk appears and submission is blocked only when the condition is met. Works with AND/OR logic and all 6 operators, same as `visibleWhen`.
+
+### disabledWhen — disable a field conditionally
+
+```tsx
+{
+  name: "notes",
+  label: "Notes",
+  type: "text",
+  disabledWhen: {
+    conditions: [{ field: "locked", operator: "equals", value: true }]
+  }
+}
+```
+
+`disabled: true` (static) and `disabledWhen` combine with OR — the field stays disabled if either is true.
+
 ---
 
 ## Input Formatter
@@ -391,6 +559,20 @@ Render multiple fields side-by-side inside a single schema entry using `type: "m
   multipleField: [
     { name: "firstName", label: "First Name", type: "text", required: true },
     { name: "lastName",  label: "Last Name",  type: "text", required: true }
+  ]
+}
+```
+
+Each sub-field gets equal width by default (`flex: 1`). Use the `flex` prop on any sub-field to control proportional width:
+
+```tsx
+{
+  name: "cityStateZip",
+  type: "multiField",
+  multipleField: [
+    { name: "city",  label: "City",     type: "text",   flex: 3 },  // 3/5 of the row
+    { name: "state", label: "State",    type: "select", flex: 1 },  // 1/5
+    { name: "zip",   label: "ZIP Code", type: "text",   flex: 1 },  // 1/5
   ]
 }
 ```
@@ -486,7 +668,7 @@ Each field accepts a `validation` object:
     minLength: { value: 3,   message: "At least 3 characters" },
     maxLength: { value: 20,  message: "At most 20 characters" },
     pattern:   { value: /^[a-z0-9_]+$/, message: "Lowercase letters, numbers, underscores only" },
-    custom:    (value, allValues) => {
+    validate:  (value, allValues) => {
       if (value === allValues.email) return "Username cannot match your email";
     }
   }
@@ -596,6 +778,23 @@ export default function Wizard() {
 ```
 
 Each step is validated before advancing. `showProgress` renders a step indicator bar.
+
+`FormWizard` is structural-only — it adds no background, shadow, padding, or border-radius. Wrap it in your own container or pass `wizardStyle` to apply visual chrome.
+
+Key `FormWizard` props:
+
+| Prop               | Type               | Description                                                  |
+|--------------------|--------------------|------------------------------------------------------------- |
+| `steps`            | `WizardStep[]`     | Array of `{ title, description, fields }` step definitions   |
+| `onSubmit`         | `(values) => void` | Called with all field values when the last step is submitted |
+| `theme`            | `FormTheme`        | Same theme object as `DynamicForm`                           |
+| `fieldRegistry`    | `FieldRegistry`    | Custom field registry for tree-shaking                       |
+| `formLabel`        | `string`           | `aria-label` on the inner `<form>` element                   |
+| `showProgress`     | `boolean`          | Show the step indicator bar (default: `true`)                |
+| `wizardStyle`      | `CSSProperties`    | Inline styles on the outer wrapper                           |
+| `navigationStyle`  | `CSSProperties`    | Inline styles on the Prev/Next button row                    |
+| `renderNavigation` | function           | Replace the built-in Prev/Next buttons entirely              |
+| `renderProgress`   | function           | Render custom progress text below the step dots              |
 
 ---
 

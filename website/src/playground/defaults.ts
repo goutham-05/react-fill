@@ -1,4 +1,4 @@
-import type { FieldConfig, FieldType } from "./types";
+import type { FieldConfig, FieldType, SubFieldType } from "./types";
 
 export function uid(): string {
   return Math.random().toString(36).slice(2, 9);
@@ -10,14 +10,18 @@ const LABELS: Record<FieldType, string> = {
   number: "Number",
   textarea: "Message",
   select: "Select Option",
+  multiselect: "Multi-Select",
   radio: "Choose One",
   checkbox: "I agree",
   date: "Date",
+  time: "Time",
+  datetime: "Date & Time",
   file: "Upload File",
   slider: "Slider",
   rating: "Rating",
   fieldArray: "Repeating Section",
   group: "Group",
+  multiField: "Inline Row",
 };
 
 export function createDefaultField(type: FieldType, count: number): FieldConfig {
@@ -52,6 +56,14 @@ export function createDefaultField(type: FieldType, count: number): FieldConfig 
     removeButtonLabel: "Remove",
     children: [
       { type: "text" as FieldType, name: "item_name", label: "Name", placeholder: "Enter name..." },
+    ],
+  };
+
+  if (type === "multiField") return {
+    ...base,
+    subFields: [
+      { id: uid(), type: "text" as SubFieldType, name: "first_name", label: "First Name", placeholder: "Jane", flex: 1 },
+      { id: uid(), type: "text" as SubFieldType, name: "last_name", label: "Last Name", placeholder: "Smith", flex: 1 },
     ],
   };
 

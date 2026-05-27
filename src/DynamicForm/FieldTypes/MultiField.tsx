@@ -13,16 +13,25 @@ interface MultiFieldProps {
  * Renders multiple sub-fields side-by-side in a single row.
  * Configure the row layout via field.layoutStyle / field.layoutClass.
  * Each sub-field in field.multipleField is a full FormFieldSchema.
+ *
+ * Flex layout is always applied (it is structural, not visual) so that
+ * unstyled: true does not break the side-by-side arrangement. Only the
+ * visual gap between columns is suppressed when unstyled.
+ *
+ * Per-sub-field width control: set `flex` on individual sub-field schemas.
+ *   e.g. { name: "firstName", flex: 3 }  +  { name: "mi", flex: 1 }
+ *   → 75 / 25 split.  Omit `flex` to keep the default equal distribution.
  */
 const MultiFieldComponent: React.FC<MultiFieldProps> = ({ field, parentName }) => {
   const theme = useFormTheme();
   const isUnstyled = theme.unstyled;
 
-  const rowStyle: React.CSSProperties = field.layoutStyle ?? (isUnstyled ? {} : {
+  // Flex display is structural — always on. Gap is visual — suppressed when unstyled.
+  const rowStyle: React.CSSProperties = field.layoutStyle ?? {
     display: "flex",
-    gap: "1rem",
-    alignItems: "flex-start"
-  });
+    alignItems: "flex-start",
+    ...(isUnstyled ? {} : { gap: "1rem" })
+  };
 
   if (!field.multipleField?.length) return null;
 
@@ -32,7 +41,10 @@ const MultiFieldComponent: React.FC<MultiFieldProps> = ({ field, parentName }) =
       style={rowStyle}
     >
       {field.multipleField.map((subField) => (
-        <div key={subField.name} style={isUnstyled ? undefined : { flex: 1, minWidth: 0 }}>
+        <div
+          key={subField.name}
+          style={{ flex: subField.flex ?? 1, minWidth: 0 }}
+        >
           <MemoizedFieldRenderer field={subField} parentName={parentName} />
         </div>
       ))}

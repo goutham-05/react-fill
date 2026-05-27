@@ -29,7 +29,7 @@ const FieldArrayFieldComponent: React.FC<FieldArrayFieldProps> = ({ field, name 
     fontSize: "14px", padding: 0, color: isDarkMode ? "#e5e7eb" : "#333",
   });
   const helpTextStyle = field.helpTextStyle ?? (isUnstyled ? undefined : {
-    fontSize: "12px", marginTop: "4px", color: isDarkMode ? "#9ca3af" : "#6b7280",
+    fontSize: "12px", marginTop: "4px", color: isDarkMode ? "#9ca3af" : "#4b5563",
   });
   const rowStyle: React.CSSProperties = isUnstyled ? {} : {
     border: `1px solid ${isDarkMode ? "#374151" : "#e5e7eb"}`,
@@ -41,7 +41,7 @@ const FieldArrayFieldComponent: React.FC<FieldArrayFieldProps> = ({ field, name 
     marginTop: "8px", padding: "6px 14px", borderRadius: "6px",
     border: `1px dashed ${isDarkMode ? "#4b5563" : "#d1d5db"}`,
     background: "transparent", cursor: "pointer", fontSize: "13px",
-    color: isDarkMode ? "#9ca3af" : "#6b7280",
+    color: isDarkMode ? "#9ca3af" : "#4b5563",
   };
   const removeBtnStyle: React.CSSProperties = isUnstyled ? {} : {
     position: "absolute", top: "8px", right: "8px", padding: "2px 8px",

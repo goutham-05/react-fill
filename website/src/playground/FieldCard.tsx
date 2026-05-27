@@ -1,29 +1,30 @@
 import React from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { BuilderAction, FieldConfig, FieldOption, FieldValidation } from "./types";
+import type { BuilderAction, FieldConfig, FieldOption, FieldValidation, SubFieldConfig, SubFieldType } from "./types";
 import { uid } from "./defaults";
 
 // ─── Shared style helpers ─────────────────────────────────────────────────────
 
 const inputCls =
-  "w-full bg-zinc-900/80 border border-zinc-700 rounded-lg px-2.5 py-1.5 text-sm text-zinc-200 " +
+  "w-full bg-gray-50/80 dark:bg-zinc-900/80 border border-gray-300 dark:border-zinc-700 rounded-lg px-2.5 py-1.5 text-sm text-gray-800 dark:text-zinc-200 " +
   "focus:outline-none focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/20 transition-all";
 
 const TYPE_BADGE: Record<string, string> = {
-  text:       "bg-blue-500/20 text-blue-300",
-  email:      "bg-sky-500/20 text-sky-300",
-  number:     "bg-amber-500/20 text-amber-300",
-  textarea:   "bg-violet-500/20 text-violet-300",
-  select:     "bg-green-500/20 text-green-300",
-  radio:      "bg-pink-500/20 text-pink-300",
-  checkbox:   "bg-cyan-500/20 text-cyan-300",
-  date:       "bg-teal-500/20 text-teal-300",
-  file:       "bg-indigo-500/20 text-indigo-300",
-  slider:     "bg-lime-500/20 text-lime-300",
-  rating:     "bg-yellow-500/20 text-yellow-300",
-  fieldArray: "bg-rose-500/20 text-rose-300",
-  group:      "bg-orange-500/20 text-orange-300",
+  text:       "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300",
+  email:      "bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300",
+  number:     "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300",
+  textarea:   "bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300",
+  select:     "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300",
+  radio:      "bg-pink-100 text-pink-700 dark:bg-pink-500/20 dark:text-pink-300",
+  checkbox:   "bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300",
+  date:       "bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300",
+  file:       "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300",
+  slider:     "bg-lime-100 text-lime-700 dark:bg-lime-500/20 dark:text-lime-300",
+  rating:     "bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300",
+  fieldArray: "bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300",
+  group:      "bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300",
+  multiField: "bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-500/20 dark:text-fuchsia-300",
 };
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -36,7 +37,7 @@ function Toggle({
       <div
         onClick={() => onChange(!value)}
         className={`relative w-8 h-4 rounded-full transition-colors duration-200 flex-shrink-0 ${
-          value ? "bg-blue-500" : "bg-zinc-700 group-hover:bg-zinc-600"
+          value ? "bg-blue-500" : "bg-gray-300 dark:bg-zinc-700 group-hover:bg-gray-200 dark:group-hover:bg-zinc-600"
         }`}
       >
         <div
@@ -45,7 +46,7 @@ function Toggle({
           }`}
         />
       </div>
-      <span className="text-xs text-zinc-400 group-hover:text-zinc-300 transition-colors">
+      <span className="text-xs text-gray-500 dark:text-zinc-400 group-hover:text-gray-700 dark:group-hover:text-zinc-300 transition-colors">
         {label}
       </span>
     </label>
@@ -58,7 +59,7 @@ function OptionsEditor({
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-600">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-zinc-600">
           Options
         </span>
         <button
@@ -68,7 +69,7 @@ function OptionsEditor({
               { id: uid(), label: `Option ${options.length + 1}`, value: `option_${options.length + 1}` },
             ])
           }
-          className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+          className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
         >
           + Add
         </button>
@@ -77,7 +78,7 @@ function OptionsEditor({
         {options.map((opt) => (
           <div key={opt.id} className="flex items-center gap-1.5">
             <input
-              className="flex-1 bg-zinc-900/80 border border-zinc-700 rounded px-2 py-1 text-xs text-zinc-300
+              className="flex-1 bg-gray-50/80 dark:bg-zinc-900/80 border border-gray-300 dark:border-zinc-700 rounded px-2 py-1 text-xs text-gray-700 dark:text-zinc-300
                 focus:outline-none focus:border-blue-500/80 transition-all"
               value={opt.label}
               placeholder="Label"
@@ -86,7 +87,7 @@ function OptionsEditor({
               }
             />
             <input
-              className="flex-1 bg-zinc-900/80 border border-zinc-700 rounded px-2 py-1 text-xs text-zinc-500 font-mono
+              className="flex-1 bg-gray-50/80 dark:bg-zinc-900/80 border border-gray-300 dark:border-zinc-700 rounded px-2 py-1 text-xs text-gray-500 dark:text-zinc-500 font-mono
                 focus:outline-none focus:border-blue-500/80 transition-all"
               value={opt.value}
               placeholder="value"
@@ -96,14 +97,14 @@ function OptionsEditor({
             />
             <button
               onClick={() => onChange(options.filter((o) => o.id !== opt.id))}
-              className="text-zinc-700 hover:text-red-400 transition-colors text-xs px-1 flex-shrink-0"
+              className="text-gray-400 dark:text-zinc-700 hover:text-red-400 transition-colors text-xs px-1 flex-shrink-0"
             >
               ✕
             </button>
           </div>
         ))}
         {options.length === 0 && (
-          <p className="text-xs text-zinc-700 italic">No options yet — click + Add</p>
+          <p className="text-xs text-gray-400 dark:text-zinc-700 italic">No options yet — click + Add</p>
         )}
       </div>
     </div>
@@ -129,11 +130,11 @@ function ValidationEditor({
 
   return (
     <div className="space-y-2">
-      <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-600">Validation</span>
+      <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-zinc-600">Validation</span>
       {showLength && (
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-[10px] text-zinc-600 mb-1 block">Min length</label>
+            <label className="text-[10px] text-gray-500 dark:text-zinc-600 mb-1 block">Min length</label>
             <input
               type="number"
               className={inputCls}
@@ -152,7 +153,7 @@ function ValidationEditor({
             )}
           </div>
           <div>
-            <label className="text-[10px] text-zinc-600 mb-1 block">Max length</label>
+            <label className="text-[10px] text-gray-500 dark:text-zinc-600 mb-1 block">Max length</label>
             <input
               type="number"
               className={inputCls}
@@ -174,7 +175,7 @@ function ValidationEditor({
       )}
       {showPattern && (
         <div>
-          <label className="text-[10px] text-zinc-600 mb-1 block">Pattern (regex)</label>
+          <label className="text-[10px] text-gray-500 dark:text-zinc-600 mb-1 block">Pattern (regex)</label>
           <input
             className={`${inputCls} font-mono`}
             value={v.pattern ?? ""}
@@ -217,7 +218,7 @@ function ConditionEditor({
           })
         }
         disabled={otherFields.length === 0}
-        className="text-xs text-zinc-600 hover:text-blue-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        className="text-xs text-gray-500 dark:text-zinc-600 hover:text-blue-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
       >
         + Add visibility condition
       </button>
@@ -227,21 +228,21 @@ function ConditionEditor({
   const OPERATORS = ["equals", "notEquals", "exists", "notExists"] as const;
 
   return (
-    <div className="space-y-2 p-3 bg-zinc-900/60 rounded-lg border border-zinc-700/50">
+    <div className="space-y-2 p-3 bg-gray-50/60 dark:bg-zinc-900/60 rounded-lg border border-gray-300/50 dark:border-zinc-700/50">
       <div className="flex items-center justify-between mb-1">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-600">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-zinc-600">
           Show this field when
         </span>
         <button
           onClick={() => onChange(null)}
-          className="text-[10px] text-zinc-600 hover:text-red-400 transition-colors"
+          className="text-[10px] text-gray-500 dark:text-zinc-600 hover:text-red-400 transition-colors"
         >
           Remove
         </button>
       </div>
       <div className="grid grid-cols-2 gap-1.5">
         <select
-          className="bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-xs text-zinc-300
+          className="bg-gray-100 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded px-2 py-1 text-xs text-gray-700 dark:text-zinc-300
             focus:outline-none focus:border-blue-500/80 transition-all"
           value={condition.field}
           onChange={(e) => onChange({ ...condition, field: e.target.value })}
@@ -252,7 +253,7 @@ function ConditionEditor({
           ))}
         </select>
         <select
-          className="bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-xs text-zinc-300
+          className="bg-gray-100 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded px-2 py-1 text-xs text-gray-700 dark:text-zinc-300
             focus:outline-none focus:border-blue-500/80 transition-all"
           value={condition.operator}
           onChange={(e) =>
@@ -266,13 +267,169 @@ function ConditionEditor({
       </div>
       {condition.operator !== "exists" && condition.operator !== "notExists" && (
         <input
-          className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-xs text-zinc-300
+          className="w-full bg-gray-100 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded px-2 py-1 text-xs text-gray-700 dark:text-zinc-300
             focus:outline-none focus:border-blue-500/80 transition-all"
           value={String(condition.value ?? "")}
           placeholder="value to match"
           onChange={(e) => onChange({ ...condition, value: e.target.value })}
         />
       )}
+    </div>
+  );
+}
+
+// ─── SubFieldEditor ───────────────────────────────────────────────────────────
+
+const SUB_FIELD_TYPES: SubFieldType[] = [
+  "text", "email", "number", "textarea", "select", "radio", "checkbox", "date", "file", "slider", "rating",
+];
+
+const subInputCls =
+  "bg-gray-50/80 dark:bg-zinc-900/80 border border-gray-300 dark:border-zinc-700 rounded px-2 py-1 text-xs text-gray-700 dark:text-zinc-300 " +
+  "focus:outline-none focus:border-blue-500/80 transition-all";
+
+function SubFieldEditor({
+  subFields,
+  onChange,
+}: {
+  subFields: SubFieldConfig[];
+  onChange: (sf: SubFieldConfig[]) => void;
+}) {
+  const addSub = () =>
+    onChange([
+      ...subFields,
+      {
+        id: uid(),
+        type: "text",
+        name: `field_${subFields.length + 1}`,
+        label: `Field ${subFields.length + 1}`,
+        flex: 1,
+      },
+    ]);
+
+  const updateSub = (id: string, patch: Partial<SubFieldConfig>) =>
+    onChange(subFields.map((sf) => (sf.id === id ? { ...sf, ...patch } : sf)));
+
+  const removeSub = (id: string) =>
+    onChange(subFields.filter((sf) => sf.id !== id));
+
+  const noPlaceholder = ["checkbox", "radio", "date", "file", "slider", "rating"];
+  const hasOptions = ["select", "radio", "checkbox"];
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-zinc-600">
+          Sub-fields
+        </span>
+        <button
+          onClick={addSub}
+          className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+        >
+          + Add
+        </button>
+      </div>
+
+      {subFields.length === 0 && (
+        <p className="text-xs text-gray-400 dark:text-zinc-700 italic">No sub-fields yet — click + Add</p>
+      )}
+
+      <div className="space-y-2">
+        {subFields.map((sf, idx) => (
+          <div
+            key={sf.id}
+            className="p-2.5 bg-gray-50/60 dark:bg-zinc-900/60 rounded-lg border border-gray-300/50 dark:border-zinc-700/50 space-y-2"
+          >
+            {/* Type + flex + remove */}
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-gray-500 dark:text-zinc-600 flex-shrink-0 w-4 text-right">
+                {idx + 1}
+              </span>
+              <select
+                className={`flex-1 ${subInputCls}`}
+                value={sf.type}
+                onChange={(e) =>
+                  updateSub(sf.id, {
+                    type: e.target.value as SubFieldType,
+                    // clear options if switching away from option-based types
+                    options: hasOptions.includes(e.target.value) ? sf.options : undefined,
+                  })
+                }
+              >
+                {SUB_FIELD_TYPES.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <span className="text-[10px] text-gray-500 dark:text-zinc-600">flex</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={10}
+                  className={`w-10 text-center ${subInputCls} font-mono`}
+                  value={sf.flex ?? 1}
+                  onChange={(e) =>
+                    updateSub(sf.id, { flex: Math.max(1, Number(e.target.value) || 1) })
+                  }
+                />
+              </div>
+              <button
+                onClick={() => removeSub(sf.id)}
+                className="text-gray-400 dark:text-zinc-700 hover:text-red-400 transition-colors text-xs flex-shrink-0"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Label + name */}
+            <div className="grid grid-cols-2 gap-1.5">
+              <input
+                className={subInputCls}
+                placeholder="Label"
+                value={sf.label}
+                onChange={(e) => updateSub(sf.id, { label: e.target.value })}
+              />
+              <input
+                className={`${subInputCls} font-mono`}
+                placeholder="name_key"
+                value={sf.name}
+                onChange={(e) =>
+                  updateSub(sf.id, {
+                    name: e.target.value.replace(/\s+/g, "_").toLowerCase(),
+                  })
+                }
+              />
+            </div>
+
+            {/* Placeholder */}
+            {!noPlaceholder.includes(sf.type) && (
+              <input
+                className={`w-full ${subInputCls}`}
+                placeholder="Placeholder…"
+                value={sf.placeholder ?? ""}
+                onChange={(e) =>
+                  updateSub(sf.id, { placeholder: e.target.value || undefined })
+                }
+              />
+            )}
+
+            {/* Required */}
+            <Toggle
+              label="Required"
+              value={!!sf.required}
+              onChange={(v) => updateSub(sf.id, { required: v || undefined })}
+            />
+
+            {/* Options for select / radio / checkbox */}
+            {hasOptions.includes(sf.type) && (
+              <OptionsEditor
+                options={sf.options ?? []}
+                onChange={(options) => updateSub(sf.id, { options })}
+              />
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -312,8 +469,8 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
         className={[
           "flex items-center gap-2.5 px-3 py-2.5 cursor-pointer transition-all select-none",
           isSelected
-            ? "bg-zinc-800 ring-1 ring-blue-500/40 rounded-xl rounded-b-none"
-            : "bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-800/50 rounded-xl",
+            ? "bg-gray-100 dark:bg-zinc-800 ring-1 ring-blue-500/40 rounded-xl rounded-b-none"
+            : "bg-gray-50/80 dark:bg-zinc-900/80 border border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 hover:bg-gray-100/50 dark:hover:bg-zinc-800/50 rounded-xl",
         ].join(" ")}
       >
         {/* Drag handle */}
@@ -321,7 +478,7 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
           {...listeners}
           {...attributes}
           onClick={(e) => e.stopPropagation()}
-          className="text-zinc-700 hover:text-zinc-400 cursor-grab active:cursor-grabbing text-sm leading-none px-0.5 flex-shrink-0"
+          className="text-gray-400 dark:text-zinc-700 hover:text-gray-500 dark:hover:text-zinc-400 cursor-grab active:cursor-grabbing text-sm leading-none px-0.5 flex-shrink-0"
           title="Drag to reorder"
         >
           ⠿
@@ -330,7 +487,7 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
         {/* Type badge */}
         <span
           className={`text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded-md flex-shrink-0 ${
-            TYPE_BADGE[field.type] ?? "bg-zinc-700 text-zinc-300"
+            TYPE_BADGE[field.type] ?? "bg-gray-200 dark:bg-zinc-700 text-gray-700 dark:text-zinc-300"
           }`}
         >
           {field.type}
@@ -338,8 +495,8 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
 
         {/* Label + name */}
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-zinc-200 truncate leading-tight">{field.label}</p>
-          <p className="text-[10px] text-zinc-600 font-mono truncate">{field.name}</p>
+          <p className="text-sm font-medium text-gray-800 dark:text-zinc-200 truncate leading-tight">{field.label}</p>
+          <p className="text-[10px] text-gray-500 dark:text-zinc-600 font-mono truncate">{field.name}</p>
         </div>
 
         {/* Badges + actions */}
@@ -351,34 +508,34 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
             <span className="text-[9px] text-red-400 border border-red-500/30 px-1 rounded">req</span>
           )}
           {field.disabled && (
-            <span className="text-[9px] text-zinc-500 border border-zinc-700 px-1 rounded">off</span>
+            <span className="text-[9px] text-gray-500 dark:text-zinc-500 border border-gray-300 dark:border-zinc-700 px-1 rounded">off</span>
           )}
           {field.validation && (
-            <span className="text-[9px] text-amber-400 border border-amber-500/30 px-1 rounded" title="Has validation rules">val</span>
+            <span className="text-[9px] text-amber-600 dark:text-amber-400 border border-amber-500/30 px-1 rounded" title="Has validation rules">val</span>
           )}
           {field.condition && (
-            <span className="text-[9px] text-blue-400 border border-blue-500/30 px-1 rounded" title="Has visibility condition">if</span>
+            <span className="text-[9px] text-blue-600 dark:text-blue-400 border border-blue-500/30 px-1 rounded" title="Has visibility condition">if</span>
           )}
           {field.apiEndpoint !== undefined && (
-            <span className="text-[9px] text-emerald-400 border border-emerald-500/30 px-1 rounded" title="Uses API endpoint">api</span>
+            <span className="text-[9px] text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-1 rounded" title="Uses API endpoint">api</span>
           )}
           {field.fullWidth && (
-            <span className="text-[9px] text-zinc-500 border border-zinc-700 px-1 rounded">full</span>
+            <span className="text-[9px] text-gray-500 dark:text-zinc-500 border border-gray-300 dark:border-zinc-700 px-1 rounded">full</span>
           )}
           {field.colSpan && !field.fullWidth && (
-            <span className="text-[9px] text-violet-400 border border-violet-500/30 px-1 rounded">{field.colSpan}col</span>
+            <span className="text-[9px] text-violet-600 dark:text-violet-400 border border-violet-500/30 px-1 rounded">{field.colSpan}col</span>
           )}
           <button
             onClick={() => dispatch({ type: "DUPLICATE", id: field.id })}
             title="Duplicate"
-            className="p-1 text-zinc-700 hover:text-zinc-300 rounded transition-colors"
+            className="p-1 text-gray-400 dark:text-zinc-700 hover:text-gray-700 dark:hover:text-zinc-300 rounded transition-colors"
           >
             ⧉
           </button>
           <button
             onClick={() => dispatch({ type: "REMOVE_FIELD", id: field.id })}
             title="Remove"
-            className="p-1 text-zinc-700 hover:text-red-400 rounded transition-colors"
+            className="p-1 text-gray-400 dark:text-zinc-700 hover:text-red-400 rounded transition-colors"
           >
             ✕
           </button>
@@ -387,11 +544,11 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
 
       {/* ─ Inline editor (expanded when selected) ─ */}
       {isSelected && (
-        <div className="bg-zinc-800/70 border border-zinc-700/80 border-t-zinc-700/30 rounded-b-xl px-4 pt-3 pb-4 space-y-3">
+        <div className="bg-gray-100/70 dark:bg-zinc-800/70 border border-gray-300/80 dark:border-zinc-700/80 border-t-gray-300/30 dark:border-t-zinc-700/30 rounded-b-xl px-4 pt-3 pb-4 space-y-3">
           {/* Label + Name */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1.5 block">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-zinc-600 mb-1.5 block">
                 Label
               </label>
               <input
@@ -401,8 +558,8 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
               />
             </div>
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1.5 block">
-                Name <span className="normal-case tracking-normal font-normal text-zinc-700">(key)</span>
+              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-zinc-600 mb-1.5 block">
+                Name <span className="normal-case tracking-normal font-normal text-gray-400 dark:text-zinc-700">(key)</span>
               </label>
               <input
                 className={`${inputCls} font-mono`}
@@ -415,9 +572,9 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
           </div>
 
           {/* Placeholder */}
-          {!["checkbox", "radio", "group", "date", "file", "slider", "rating", "fieldArray"].includes(field.type) && (
+          {!["checkbox", "radio", "group", "date", "file", "slider", "rating", "fieldArray", "multiField"].includes(field.type) && (
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1.5 block">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-zinc-600 mb-1.5 block">
                 Placeholder
               </label>
               <input
@@ -432,7 +589,7 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
           {/* Help text + Tooltip */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1.5 block">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-zinc-600 mb-1.5 block">
                 Help Text
               </label>
               <input
@@ -443,7 +600,7 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
               />
             </div>
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1.5 block">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-zinc-600 mb-1.5 block">
                 Tooltip
               </label>
               <input
@@ -467,8 +624,8 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
               />
             ) : (
               <div className="flex items-center gap-2">
-                <span className="text-xs text-zinc-400">Span</span>
-                <div className="flex items-center bg-zinc-900 border border-zinc-700 rounded-lg overflow-hidden">
+                <span className="text-xs text-gray-500 dark:text-zinc-400">Span</span>
+                <div className="flex items-center bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-lg overflow-hidden">
                   {/* Auto — no span override */}
                   <button
                     onClick={() => update({ colSpan: undefined, fullWidth: undefined })}
@@ -477,7 +634,7 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
                       "px-2 py-0.5 text-[10px] font-semibold transition-colors",
                       !field.colSpan && !field.fullWidth
                         ? "bg-blue-600 text-white"
-                        : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800",
+                        : "text-gray-500 dark:text-zinc-500 hover:text-gray-700 dark:hover:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800",
                     ].join(" ")}
                   >
                     1
@@ -491,7 +648,7 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
                         "px-2 py-0.5 text-[10px] font-semibold transition-colors",
                         field.colSpan === 2 && !field.fullWidth
                           ? "bg-blue-600 text-white"
-                          : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800",
+                          : "text-gray-500 dark:text-zinc-500 hover:text-gray-700 dark:hover:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800",
                       ].join(" ")}
                     >
                       2
@@ -505,7 +662,7 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
                       "px-2 py-0.5 text-[10px] font-semibold transition-colors",
                       field.fullWidth
                         ? "bg-blue-600 text-white"
-                        : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800",
+                        : "text-gray-500 dark:text-zinc-500 hover:text-gray-700 dark:hover:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800",
                     ].join(" ")}
                   >
                     Full
@@ -520,7 +677,7 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
             <div className="grid grid-cols-3 gap-3">
               {(["min", "max", "step"] as const).map((k) => (
                 <div key={k}>
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1.5 block">{k}</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-zinc-600 mb-1.5 block">{k}</label>
                   <input
                     type="number"
                     className={inputCls}
@@ -538,7 +695,7 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
           {field.type === "textarea" && (
             <div className="flex items-end gap-4">
               <div>
-                <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1.5 block">Rows</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-zinc-600 mb-1.5 block">Rows</label>
                 <input
                   type="number"
                   className={`${inputCls} w-24`}
@@ -565,7 +722,7 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
             return (
               <div className="space-y-2">
                 {/* Segmented control */}
-                <div className="flex items-center gap-0 bg-zinc-900 border border-zinc-700 rounded-lg overflow-hidden w-fit">
+                <div className="flex items-center gap-0 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-lg overflow-hidden w-fit">
                   <button
                     onClick={() => {
                       if (optionsMode !== "static") {
@@ -576,7 +733,7 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
                       "px-3 py-1 text-[10px] font-semibold transition-colors",
                       optionsMode === "static"
                         ? "bg-blue-600 text-white"
-                        : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800",
+                        : "text-gray-500 dark:text-zinc-500 hover:text-gray-700 dark:hover:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800",
                     ].join(" ")}
                   >
                     Static
@@ -591,7 +748,7 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
                       "px-3 py-1 text-[10px] font-semibold transition-colors",
                       optionsMode === "api"
                         ? "bg-blue-600 text-white"
-                        : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800",
+                        : "text-gray-500 dark:text-zinc-500 hover:text-gray-700 dark:hover:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800",
                     ].join(" ")}
                   >
                     API Endpoint
@@ -608,7 +765,7 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
                 {optionsMode === "api" && (
                   <div className="space-y-2">
                     <div>
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1.5 block">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-zinc-600 mb-1.5 block">
                         Endpoint URL
                       </label>
                       <input
@@ -619,11 +776,11 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1.5 block">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-zinc-600 mb-1.5 block">
                         Depends on field
                       </label>
                       <select
-                        className="w-full bg-zinc-900/80 border border-zinc-700 rounded-lg px-2.5 py-1.5 text-sm text-zinc-200 focus:outline-none focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/20 transition-all"
+                        className="w-full bg-gray-50/80 dark:bg-zinc-900/80 border border-gray-300 dark:border-zinc-700 rounded-lg px-2.5 py-1.5 text-sm text-gray-800 dark:text-zinc-200 focus:outline-none focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/20 transition-all"
                         value={field.dependsOn ?? ""}
                         onChange={(e) => update({ dependsOn: e.target.value || undefined })}
                       >
@@ -643,7 +800,7 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
           {field.type === "file" && (
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1.5 block">Accept</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-zinc-600 mb-1.5 block">Accept</label>
                 <input
                   className={inputCls}
                   value={field.accept ?? ""}
@@ -662,7 +819,7 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
             <div className="grid grid-cols-3 gap-3">
               {(["min", "max", "step"] as const).map((k) => (
                 <div key={k}>
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1.5 block">{k}</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-zinc-600 mb-1.5 block">{k}</label>
                   <input
                     type="number"
                     className={inputCls}
@@ -677,7 +834,7 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
           {/* Rating-specific */}
           {field.type === "rating" && (
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1.5 block">Stars</label>
+              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-zinc-600 mb-1.5 block">Stars</label>
               <input
                 type="number"
                 className={`${inputCls} w-24`}
@@ -693,7 +850,7 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
           {field.type === "fieldArray" && (
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1.5 block">Add Button Label</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-zinc-600 mb-1.5 block">Add Button Label</label>
                 <input
                   className={inputCls}
                   value={field.addButtonLabel ?? ""}
@@ -702,7 +859,7 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
                 />
               </div>
               <div>
-                <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1.5 block">Remove Button Label</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-zinc-600 mb-1.5 block">Remove Button Label</label>
                 <input
                   className={inputCls}
                   value={field.removeButtonLabel ?? ""}
@@ -713,8 +870,16 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
             </div>
           )}
 
+          {/* Inline row (multiField) */}
+          {field.type === "multiField" && (
+            <SubFieldEditor
+              subFields={field.subFields ?? []}
+              onChange={(subFields) => update({ subFields })}
+            />
+          )}
+
           {/* Validation */}
-          <div className="border-t border-zinc-700/40 pt-3">
+          <div className="border-t border-gray-300/40 dark:border-zinc-700/40 pt-3">
             <ValidationEditor
               validation={field.validation}
               fieldType={field.type}
@@ -723,7 +888,7 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
           </div>
 
           {/* Condition */}
-          <div className="border-t border-zinc-700/40 pt-3">
+          <div className="border-t border-gray-300/40 dark:border-zinc-700/40 pt-3">
             <ConditionEditor
               condition={field.condition ?? null}
               allFields={allFields}

@@ -4,14 +4,32 @@ export type FieldType =
   | "number"
   | "textarea"
   | "select"
+  | "multiselect"
   | "radio"
   | "checkbox"
   | "date"
+  | "time"
+  | "datetime"
   | "file"
   | "slider"
   | "rating"
   | "fieldArray"
-  | "group";
+  | "group"
+  | "multiField";
+
+/** Leaf types that can appear as multiField sub-fields (no nesting). */
+export type SubFieldType = Exclude<FieldType, "multiField" | "group" | "fieldArray">;
+
+export interface SubFieldConfig {
+  id: string;
+  type: SubFieldType;
+  name: string;
+  label: string;
+  placeholder?: string;
+  required?: boolean;
+  flex?: number;
+  options?: FieldOption[];
+}
 
 export interface FieldOption {
   id: string;
@@ -67,6 +85,8 @@ export interface FieldConfig {
   addButtonLabel?: string;
   removeButtonLabel?: string;
   children?: Omit<FieldConfig, "id">[];
+  // multiField
+  subFields?: SubFieldConfig[];
   // validation
   validation?: FieldValidation;
   // visibleWhen (single condition for simplicity)

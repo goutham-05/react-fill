@@ -3,6 +3,22 @@ import { useFormContext } from "react-hook-form";
 import { FieldType } from "./constant";
 
 /**
+ * Shared condition configuration used by visibleWhen, requiredWhen, and disabledWhen.
+ * All three props accept identical shape — only the effect differs.
+ */
+export interface ConditionConfig {
+  /** How to combine multiple conditions. Default: "AND" (all must pass). */
+  logic?: "AND" | "OR";
+  conditions: {
+    /** Dot-path to the controlling field, e.g. "address.country". */
+    field: string;
+    /** Expected value. For "in"/"notIn" operators, pass an array. */
+    value?: any | any[];
+    operator?: "equals" | "notEquals" | "in" | "notIn" | "exists" | "notExists";
+  }[];
+}
+
+/**
  * Schema definition for a single form field used in DynamicForm / FormWizard.
  *
  * Drop a FormFieldSchema object into a schema array and the form engine handles
@@ -28,8 +44,30 @@ export interface FormFieldSchema {
   /** Mark the field as required (triggers built-in required validation). */
   required?: boolean;
 
+  /**
+   * Make the field required only when the specified conditions are met.
+   * Combined with `required: true` via OR — either alone is enough to require the field.
+   *
+   * @example
+   * requiredWhen: {
+   *   conditions: [{ field: "role", value: "admin", operator: "equals" }]
+   * }
+   */
+  requiredWhen?: ConditionConfig;
+
   /** Disable user interaction. */
   disabled?: boolean;
+
+  /**
+   * Disable the field when the specified conditions are met.
+   * Combined with `disabled: true` via OR — either alone disables the field.
+   *
+   * @example
+   * disabledWhen: {
+   *   conditions: [{ field: "plan", value: "free", operator: "equals" }]
+   * }
+   */
+  disabledWhen?: ConditionConfig;
 
   /** Make the field read-only (value visible but not editable). */
   readOnly?: boolean;
@@ -53,8 +91,20 @@ export interface FormFieldSchema {
     pattern?: { value: RegExp; message: string };
     minLength?: { value: number; message: string };
     maxLength?: { value: number; message: string };
-    /** Return true when valid, or an error message string when invalid. */
-    custom?: (value: any) => boolean | string;
+    /**
+     * Field-level validation. Receives the field's current value and,
+     * optionally, the entire form values object — useful for cross-field
+     * checks (e.g. confirm-password must match password).
+     * Return true when valid, or an error message string when invalid.
+     *
+     * Alias of `custom` — prefer `validate` for clarity.
+     */
+    validate?: (value: any, formValues?: Record<string, any>) => boolean | string | Promise<boolean | string>;
+    /**
+     * @deprecated Use `validate` instead.
+     * Kept for backward compatibility — both are supported simultaneously.
+     */
+    custom?: (value: any, formValues?: Record<string, any>) => boolean | string | Promise<boolean | string>;
   };
 
   // ─── Conditional Visibility ───────────────────────────────────────────────
@@ -66,21 +116,10 @@ export interface FormFieldSchema {
    * @example
    * visibleWhen: {
    *   logic: "AND",
-   *   conditions: [
-   *     { field: "role", value: "admin", operator: "equals" }
-   *   ]
+   *   conditions: [{ field: "role", value: "admin", operator: "equals" }]
    * }
    */
-  visibleWhen?: {
-    /** How to combine multiple conditions. Default: "AND". */
-    logic?: "AND" | "OR";
-    conditions: {
-      /** Dot-path to the controlling field, e.g. "address.country". */
-      field: string;
-      value: any | any[];
-      operator?: "equals" | "notEquals" | "in" | "notIn" | "exists" | "notExists";
-    }[];
-  };
+  visibleWhen?: ConditionConfig;
 
   /** Keep the stored value when the field is hidden. Default: false (value is cleared). */
   preserveValue?: boolean;
@@ -213,8 +252,15 @@ export interface FormFieldSchema {
   /** API endpoint URL to fetch options from. */
   apiEndpoint?: string;
 
-  /** Name of another field whose value is passed to getOptions. */
-  dependsOn?: string;
+  /**
+   * Name of another field (or multiple fields) whose value(s) are passed to
+   * getOptions / apiEndpoint when they change.
+   *
+   * - Single string: `dependsOn: "country"` — passed as `?country=CA`
+   * - Array: `dependsOn: ["country", "tier"]` — passed as `?country=CA&tier=pro`
+   *   and `getOptions` receives `{ country: "CA", tier: "pro" }` instead of a single value.
+   */
+  dependsOn?: string | string[];
 
   // ─── Event Handlers ──────────────────────────────────────────────────────
 
@@ -294,6 +340,23 @@ export interface FormFieldSchema {
   layoutClass?: string;
   /** Inline style applied to the group/multiField layout container. */
   layoutStyle?: React.CSSProperties;
+
+  /**
+   * Controls how much of the multiField row this sub-field occupies.
+   * Maps directly to the CSS `flex` shorthand on the sub-field's container.
+   *
+   * @example
+   * // First Name takes 3× as much space as Middle Initial:
+   * { name: "firstName", flex: 3 }
+   * { name: "mi",        flex: 1 }
+   *
+   * // Fixed width (exact pixel or rem value):
+   * { name: "zip", flex: "0 0 120px" }
+   *
+   * Omit to use the default equal distribution (flex: 1).
+   * Only meaningful when this field is a sub-field inside `multipleField`.
+   */
+  flex?: number | string;
 
   // ─── Custom Rendering ─────────────────────────────────────────────────────
 

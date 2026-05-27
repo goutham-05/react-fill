@@ -1,6 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
-import { DynamicForm } from "./index";
+import { DynamicForm, FIELD_TYPES } from "./index";
 import type { FormFieldSchema, SubmitButtonRenderProps } from "./index";
 
 const meta: Meta<typeof DynamicForm> = {
@@ -24,9 +24,9 @@ export const TextFields: Story = {
   name: "Text / Email",
   args: {
     schema: [
-      { name: "full_name", label: "Full Name", type: "text", required: true, placeholder: "Jane Smith", helpText: "Enter your first and last name." },
-      { name: "email", label: "Email Address", type: "email", required: true, placeholder: "jane@example.com" },
-      { name: "website", label: "Website", type: "text", placeholder: "https://", helpText: "Optional" },
+      { name: "full_name", label: "Full Name", type: FIELD_TYPES.TEXT, required: true, placeholder: "Jane Smith", helpText: "Enter your first and last name." },
+      { name: "email", label: "Email Address", type: FIELD_TYPES.EMAIL, required: true, placeholder: "jane@example.com" },
+      { name: "website", label: "Website", type: FIELD_TYPES.TEXT, placeholder: "https://", helpText: "Optional" },
     ] satisfies FormFieldSchema[],
   },
 };
@@ -37,8 +37,8 @@ export const NumberField: Story = {
   name: "Number",
   args: {
     schema: [
-      { name: "age", label: "Age", type: "number", min: 0, max: 120, step: 1, required: true },
-      { name: "score", label: "Score (0–100)", type: "number", min: 0, max: 100, placeholder: "50" },
+      { name: "age", label: "Age", type: FIELD_TYPES.NUMBER, min: 0, max: 120, step: 1, required: true },
+      { name: "score", label: "Score (0–100)", type: FIELD_TYPES.NUMBER, min: 0, max: 100, placeholder: "50" },
     ] satisfies FormFieldSchema[],
   },
 };
@@ -52,7 +52,7 @@ export const TextareaField: Story = {
       {
         name: "bio",
         label: "Bio",
-        type: "textarea",
+        type: FIELD_TYPES.TEXTAREA,
         rows: 5,
         placeholder: "Tell us about yourself…",
         showWordCount: true,
@@ -71,7 +71,7 @@ export const SelectField: Story = {
       {
         name: "country",
         label: "Country",
-        type: "select",
+        type: FIELD_TYPES.SELECT,
         required: true,
         options: [
           { label: "United States", value: "us" },
@@ -93,7 +93,7 @@ export const RadioField: Story = {
       {
         name: "plan",
         label: "Choose a plan",
-        type: "radio",
+        type: FIELD_TYPES.RADIO,
         required: true,
         options: [
           { label: "Free — basic features", value: "free", helpText: "Great for personal projects" },
@@ -111,11 +111,11 @@ export const CheckboxField: Story = {
   name: "Checkbox",
   args: {
     schema: [
-      { name: "terms", label: "I accept the terms and conditions", type: "checkbox", required: true },
+      { name: "terms", label: "I accept the terms and conditions", type: FIELD_TYPES.CHECKBOX, required: true },
       {
         name: "interests",
         label: "Interests",
-        type: "checkbox",
+        type: FIELD_TYPES.CHECKBOX,
         options: [
           { label: "Frontend", value: "frontend" },
           { label: "Backend", value: "backend" },
@@ -133,8 +133,8 @@ export const DateField: Story = {
   name: "Date",
   args: {
     schema: [
-      { name: "dob", label: "Date of Birth", type: "date", required: true, max: new Date().toISOString().split("T")[0] },
-      { name: "event_date", label: "Event Date", type: "date", min: new Date().toISOString().split("T")[0] },
+      { name: "dob", label: "Date of Birth", type: FIELD_TYPES.DATE, required: true, max: new Date().toISOString().split("T")[0] },
+      { name: "event_date", label: "Event Date", type: FIELD_TYPES.DATE, min: new Date().toISOString().split("T")[0] },
     ] satisfies FormFieldSchema[],
   },
 };
@@ -145,8 +145,8 @@ export const FileField: Story = {
   name: "File Upload",
   args: {
     schema: [
-      { name: "avatar", label: "Profile Picture", type: "file", accept: "image/*", helpText: "JPG, PNG, GIF up to 5MB" },
-      { name: "documents", label: "Attachments", type: "file", accept: ".pdf,.doc,.docx", multiple: true },
+      { name: "avatar", label: "Profile Picture", type: FIELD_TYPES.FILE, accept: "image/*", helpText: "JPG, PNG, GIF up to 5MB" },
+      { name: "documents", label: "Attachments", type: FIELD_TYPES.FILE, accept: ".pdf,.doc,.docx", multiple: true },
     ] satisfies FormFieldSchema[],
   },
 };
@@ -157,8 +157,8 @@ export const SliderField: Story = {
   name: "Slider",
   args: {
     schema: [
-      { name: "volume", label: "Volume", type: "slider", min: 0, max: 100, step: 1, defaultValue: 50 },
-      { name: "rating_scale", label: "Satisfaction (1–10)", type: "slider", min: 1, max: 10, step: 1, defaultValue: 5 },
+      { name: "volume", label: "Volume", type: FIELD_TYPES.SLIDER, min: 0, max: 100, step: 1, defaultValue: 50 },
+      { name: "rating_scale", label: "Satisfaction (1–10)", type: FIELD_TYPES.SLIDER, min: 1, max: 10, step: 1, defaultValue: 5 },
     ] satisfies FormFieldSchema[],
   },
 };
@@ -169,8 +169,8 @@ export const RatingField: Story = {
   name: "Rating",
   args: {
     schema: [
-      { name: "overall", label: "Overall Rating", type: "rating", starCount: 5, required: true },
-      { name: "value", label: "Value for Money", type: "rating", starCount: 10 },
+      { name: "overall", label: "Overall Rating", type: FIELD_TYPES.RATING, starCount: 5, required: true },
+      { name: "value", label: "Value for Money", type: FIELD_TYPES.RATING, starCount: 10 },
     ] satisfies FormFieldSchema[],
   },
 };
@@ -184,7 +184,7 @@ export const ConditionalFields: Story = {
       {
         name: "contact_method",
         label: "Preferred contact",
-        type: "radio",
+        type: FIELD_TYPES.RADIO,
         required: true,
         options: [
           { label: "Email", value: "email" },
@@ -194,7 +194,7 @@ export const ConditionalFields: Story = {
       {
         name: "email_address",
         label: "Email",
-        type: "email",
+        type: FIELD_TYPES.EMAIL,
         required: true,
         placeholder: "you@example.com",
         visibleWhen: { conditions: [{ field: "contact_method", operator: "equals", value: "email" }] },
@@ -202,7 +202,7 @@ export const ConditionalFields: Story = {
       {
         name: "phone_number",
         label: "Phone",
-        type: "text",
+        type: FIELD_TYPES.TEXT,
         required: true,
         placeholder: "+1 555 000 0000",
         visibleWhen: { conditions: [{ field: "contact_method", operator: "equals", value: "phone" }] },
@@ -220,7 +220,7 @@ export const ValidationRules: Story = {
       {
         name: "username",
         label: "Username",
-        type: "text",
+        type: FIELD_TYPES.TEXT,
         required: true,
         validation: {
           minLength: { value: 3, message: "At least 3 characters" },
@@ -231,7 +231,7 @@ export const ValidationRules: Story = {
       {
         name: "password",
         label: "Password",
-        type: "text",
+        type: FIELD_TYPES.TEXT,
         required: true,
         validation: {
           minLength: { value: 8, message: "At least 8 characters" },
@@ -248,13 +248,13 @@ export const MultiColumnLayout: Story = {
   args: {
     columns: 3,
     schema: [
-      { name: "first_name", label: "First Name", type: "text", required: true, placeholder: "Jane" },
-      { name: "last_name",  label: "Last Name",  type: "text", required: true, placeholder: "Smith" },
-      { name: "email",      label: "Email",      type: "email", required: true, placeholder: "jane@example.com" },
-      { name: "address",    label: "Address",    type: "text", fullWidth: true, placeholder: "123 Main St" },
-      { name: "city",       label: "City",       type: "text", placeholder: "New York" },
-      { name: "zip",        label: "ZIP Code",   type: "text", placeholder: "10001" },
-      { name: "notes",      label: "Notes",      type: "textarea", rows: 3, fullWidth: true },
+      { name: "first_name", label: "First Name", type: FIELD_TYPES.TEXT, required: true, placeholder: "Jane" },
+      { name: "last_name",  label: "Last Name",  type: FIELD_TYPES.TEXT, required: true, placeholder: "Smith" },
+      { name: "email",      label: "Email",      type: FIELD_TYPES.EMAIL, required: true, placeholder: "jane@example.com" },
+      { name: "address",    label: "Address",    type: FIELD_TYPES.TEXT, fullWidth: true, placeholder: "123 Main St" },
+      { name: "city",       label: "City",       type: FIELD_TYPES.TEXT, placeholder: "New York" },
+      { name: "zip",        label: "ZIP Code",   type: FIELD_TYPES.TEXT, placeholder: "10001" },
+      { name: "notes",      label: "Notes",      type: FIELD_TYPES.TEXTAREA, rows: 3, fullWidth: true },
     ] satisfies FormFieldSchema[],
   },
 };
@@ -268,13 +268,13 @@ export const FieldArrayStory: Story = {
       {
         name: "contacts",
         label: "Emergency Contacts",
-        type: "fieldArray",
+        type: FIELD_TYPES.FIELD_ARRAY,
         addButtonLabel: "+ Add contact",
         removeButtonLabel: "Remove",
         children: [
-          { name: "name",  label: "Name",  type: "text",  required: true, placeholder: "Full name" },
-          { name: "phone", label: "Phone", type: "text",  placeholder: "+1 555 000 0000" },
-          { name: "rel",   label: "Relationship", type: "select", options: [
+          { name: "name",  label: "Name",  type: FIELD_TYPES.TEXT,  required: true, placeholder: "Full name" },
+          { name: "phone", label: "Phone", type: FIELD_TYPES.TEXT,  placeholder: "+1 555 000 0000" },
+          { name: "rel",   label: "Relationship", type: FIELD_TYPES.SELECT, options: [
             { label: "Spouse", value: "spouse" },
             { label: "Parent", value: "parent" },
             { label: "Sibling", value: "sibling" },
@@ -292,8 +292,8 @@ export const CustomSubmitButton: Story = {
   name: "Custom submit button (renderSubmitButton)",
   args: {
     schema: [
-      { name: "email", label: "Email", type: "email", required: true, placeholder: "you@example.com" },
-      { name: "message", label: "Message", type: "textarea", rows: 3, required: true },
+      { name: "email", label: "Email", type: FIELD_TYPES.EMAIL, required: true, placeholder: "you@example.com" },
+      { name: "message", label: "Message", type: FIELD_TYPES.TEXTAREA, rows: 3, required: true },
     ] satisfies FormFieldSchema[],
     onSubmit: (data: Record<string, unknown>) =>
       new Promise<void>((res) => setTimeout(() => { alert(JSON.stringify(data, null, 2)); res(); }, 1500)),
@@ -328,7 +328,7 @@ export const IconButtons: Story = {
   name: "Built-in buttons with icons",
   args: {
     schema: [
-      { name: "name", label: "Full Name", type: "text", required: true, placeholder: "Jane Smith" },
+      { name: "name", label: "Full Name", type: FIELD_TYPES.TEXT, required: true, placeholder: "Jane Smith" },
     ] satisfies FormFieldSchema[],
     showReset: true,
     submitLabel: "Save",
@@ -350,7 +350,7 @@ export const AsyncSelect: Story = {
       {
         name: "framework",
         label: "Favourite framework",
-        type: "select",
+        type: FIELD_TYPES.SELECT,
         required: true,
         helpText: "Options load after a 1 s simulated delay.",
         getOptions: () =>
@@ -372,7 +372,7 @@ export const DependentSelect: Story = {
       {
         name: "country",
         label: "Country",
-        type: "select",
+        type: FIELD_TYPES.SELECT,
         required: true,
         options: [
           { label: "United States", value: "us" },
@@ -383,7 +383,7 @@ export const DependentSelect: Story = {
       {
         name: "state",
         label: "State / Province",
-        type: "select",
+        type: FIELD_TYPES.SELECT,
         required: true,
         dependsOn: "country",
         helpText: "Updates when you pick a country (800 ms simulated latency).",
@@ -419,7 +419,7 @@ export const AsyncRadio: Story = {
       {
         name: "plan",
         label: "Choose a plan",
-        type: "radio",
+        type: FIELD_TYPES.RADIO,
         required: true,
         helpText: "Options load after a 900 ms simulated delay.",
         getOptions: () =>
@@ -440,7 +440,7 @@ export const AsyncCheckbox: Story = {
       {
         name: "interests",
         label: "Interests",
-        type: "checkbox",
+        type: FIELD_TYPES.CHECKBOX,
         helpText: "Options load after a 700 ms simulated delay.",
         getOptions: () =>
           delay(700, [
@@ -455,6 +455,471 @@ export const AsyncCheckbox: Story = {
   },
 };
 
+// ─── Multi-field row ──────────────────────────────────────────────────────────
+
+export const MultiFieldRow: Story = {
+  name: "Multi-field row (multiField + flex)",
+  args: {
+    columns: 1,
+    schema: [
+      {
+        name: "nameRow",
+        label: "Full Name",
+        type: FIELD_TYPES.MULTI_FIELD,
+        multipleField: [
+          { name: "firstName",    label: "First Name",    type: FIELD_TYPES.TEXT, required: true, placeholder: "Jane" },
+          { name: "middleInitial",label: "M.I.",          type: FIELD_TYPES.TEXT, placeholder: "A", flex: 0.4 },
+          { name: "lastName",     label: "Last Name",     type: FIELD_TYPES.TEXT, required: true, placeholder: "Smith" },
+        ],
+      },
+      {
+        name: "cityStateZip",
+        label: "City / State / ZIP",
+        type: FIELD_TYPES.MULTI_FIELD,
+        multipleField: [
+          { name: "city",  label: "City",     type: FIELD_TYPES.TEXT,   required: true, placeholder: "New York", flex: 3 },
+          { name: "state", label: "State",    type: FIELD_TYPES.SELECT, required: true, flex: 1, options: [
+            { label: "CA", value: "ca" }, { label: "NY", value: "ny" }, { label: "TX", value: "tx" },
+          ]},
+          { name: "zip",   label: "ZIP Code", type: FIELD_TYPES.TEXT,   required: true, placeholder: "10001", flex: 1 },
+        ],
+      },
+    ] satisfies FormFieldSchema[],
+  },
+};
+
+// ─── Cross-field validation ───────────────────────────────────────────────────
+
+export const CrossFieldValidation: Story = {
+  name: "Cross-field validation (validate)",
+  args: {
+    columns: 1,
+    mode: "onBlur",
+    schema: [
+      {
+        name: "email",
+        label: "Email",
+        type: FIELD_TYPES.EMAIL,
+        required: true,
+        placeholder: "you@example.com",
+      },
+      {
+        name: "confirmEmail",
+        label: "Confirm Email",
+        type: FIELD_TYPES.EMAIL,
+        required: true,
+        placeholder: "you@example.com",
+        validation: {
+          validate: (value: any, formValues?: Record<string, any>) =>
+            value === formValues?.["email"] || "Emails do not match",
+        },
+      },
+      {
+        name: "password",
+        label: "Password",
+        type: FIELD_TYPES.TEXT,
+        required: true,
+        validation: { minLength: { value: 8, message: "At least 8 characters" } },
+      },
+      {
+        name: "confirmPassword",
+        label: "Confirm Password",
+        type: FIELD_TYPES.TEXT,
+        required: true,
+        validation: {
+          validate: (value: any, formValues?: Record<string, any>) =>
+            value === formValues?.["password"] || "Passwords do not match",
+        },
+      },
+    ] satisfies FormFieldSchema[],
+  },
+};
+
+// ─── Theme — inline styles ────────────────────────────────────────────────────
+
+export const ThemeInlineStyles: Story = {
+  name: "Theme — inline styles (inputStyle / labelStyle)",
+  args: {
+    columns: 1,
+    theme: {
+      inputStyle: {
+        borderWidth: "1.5px",
+        borderStyle: "solid",
+        borderColor: "#6B748E",
+        borderRadius: "8px",
+        height: "48px",
+        padding: "12px 16px",
+        fontSize: "14px",
+      },
+      labelStyle: {
+        fontWeight: 600,
+        fontSize: "14px",
+        color: "#111827",
+        marginBottom: "6px",
+      },
+      wrapperStyle: { marginBottom: "1.25rem" },
+    },
+    schema: [
+      { name: "firstName",   label: "First Name",    type: FIELD_TYPES.TEXT,   required: true, placeholder: "Jane" },
+      { name: "lastName",    label: "Last Name",     type: FIELD_TYPES.TEXT,   required: true, placeholder: "Smith" },
+      { name: "email",       label: "Email",         type: FIELD_TYPES.EMAIL,  required: true, placeholder: "jane@example.com" },
+      { name: "country",     label: "Country",       type: FIELD_TYPES.SELECT, required: true, options: [
+        { label: "United States", value: "us" },
+        { label: "United Kingdom", value: "uk" },
+        { label: "Canada", value: "ca" },
+      ]},
+    ] satisfies FormFieldSchema[],
+  } as any,
+};
+
+// ─── Theme — component registry ──────────────────────────────────────────────
+
+const CustomSelectField: React.FC<{ field: any; name: string; error?: any; register: any }> = ({ field, name, error }) => {
+  const { control } = (window as any).__RHF_CONTEXT__ ?? {};
+  return (
+    <div style={{ marginBottom: "1rem" }}>
+      <label htmlFor={name} style={{ display: "block", fontWeight: 600, marginBottom: 4, fontSize: 13, color: "#374151" }}>
+        {field.label}{field.required && <span style={{ color: "red", marginLeft: 2 }}>*</span>}
+      </label>
+      <div style={{
+        padding: "8px 12px", border: `1.5px solid ${error ? "#ef4444" : "#6366f1"}`,
+        borderRadius: 8, background: "#f5f3ff", color: "#4f46e5", fontSize: 14, fontWeight: 500
+      }}>
+        <select
+          id={name}
+          style={{ background: "transparent", border: "none", outline: "none", width: "100%", color: "inherit", fontSize: "inherit", fontWeight: "inherit", cursor: "pointer" }}
+        >
+          <option value="">Select…</option>
+          {field.options?.map((o: any) => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </select>
+      </div>
+      {error && <p style={{ color: "#ef4444", fontSize: 12, marginTop: 4 }}>{error.message ?? "Required"}</p>}
+    </div>
+  );
+};
+
+export const ThemeComponentRegistry: Story = {
+  name: "Theme — components registry (custom select)",
+  args: {
+    columns: 1,
+    theme: {
+      components: {
+        select: CustomSelectField,
+      },
+    },
+    schema: [
+      { name: "name",      label: "Full Name", type: FIELD_TYPES.TEXT,   required: true, placeholder: "Jane Smith" },
+      { name: "framework", label: "Framework", type: FIELD_TYPES.SELECT, required: true, options: [
+        { label: "React",   value: "react" },
+        { label: "Vue",     value: "vue" },
+        { label: "Svelte",  value: "svelte" },
+        { label: "Angular", value: "angular" },
+      ]},
+      { name: "language",  label: "Language",  type: FIELD_TYPES.SELECT, required: true, options: [
+        { label: "TypeScript", value: "ts" },
+        { label: "JavaScript", value: "js" },
+      ]},
+    ] satisfies FormFieldSchema[],
+  } as any,
+};
+
+// ─── New field types: multiselect / time / datetime ──────────────────────────
+
+export const MultiSelectField: Story = {
+  name: "Multi-select (searchable dropdown)",
+  args: {
+    columns: 1,
+    schema: [
+      {
+        name: "frameworks",
+        label: "Frameworks",
+        type: FIELD_TYPES.MULTISELECT,
+        required: true,
+        helpText: "Select all that apply. Use the search box to filter.",
+        options: [
+          { label: "React",      value: "react" },
+          { label: "Vue",        value: "vue" },
+          { label: "Angular",    value: "angular" },
+          { label: "Svelte",     value: "svelte" },
+          { label: "SolidJS",    value: "solid" },
+          { label: "Next.js",    value: "next" },
+          { label: "Remix",      value: "remix" },
+          { label: "Astro",      value: "astro" },
+        ],
+      },
+      {
+        name: "skills",
+        label: "Skills (async)",
+        type: FIELD_TYPES.MULTISELECT,
+        helpText: "Options loaded asynchronously after 600 ms.",
+        getOptions: () =>
+          new Promise((res) =>
+            setTimeout(() => res([
+              { label: "TypeScript", value: "ts" },
+              { label: "GraphQL",    value: "gql" },
+              { label: "Docker",     value: "docker" },
+              { label: "Kubernetes", value: "k8s" },
+              { label: "Terraform",  value: "tf" },
+            ]), 600)
+          ),
+      },
+    ] satisfies FormFieldSchema[],
+  },
+};
+
+// ─── Time & Datetime ──────────────────────────────────────────────────────────
+
+export const TimeAndDatetime: Story = {
+  name: "Time & Datetime fields",
+  args: {
+    columns: 2,
+    schema: [
+      {
+        name: "startTime",
+        label: "Start Time",
+        type: FIELD_TYPES.TIME,
+        required: true,
+        min: "08:00",
+        max: "18:00",
+        helpText: "Between 08:00 and 18:00",
+      },
+      {
+        name: "endTime",
+        label: "End Time",
+        type: FIELD_TYPES.TIME,
+        min: "08:00",
+        max: "22:00",
+        step: 900,
+        helpText: "15-minute increments",
+      },
+      {
+        name: "scheduledAt",
+        label: "Scheduled Date & Time",
+        type: FIELD_TYPES.DATETIME,
+        required: true,
+        fullWidth: true,
+        helpText: "Exact date and time for the event.",
+      },
+      {
+        name: "deadline",
+        label: "Deadline",
+        type: FIELD_TYPES.DATETIME,
+        fullWidth: true,
+        min: new Date().toISOString().slice(0, 16),
+        helpText: "Cannot be in the past.",
+      },
+    ] satisfies FormFieldSchema[],
+  },
+};
+
+// ─── requiredWhen + disabledWhen ──────────────────────────────────────────────
+
+export const ConditionalRequiredDisabled: Story = {
+  name: "Conditional required & disabled",
+  args: {
+    columns: 1,
+    schema: [
+      {
+        name: "accountType",
+        label: "Account Type",
+        type: FIELD_TYPES.SELECT,
+        required: true,
+        options: [
+          { label: "Personal",  value: "personal"  },
+          { label: "Business",  value: "business"  },
+          { label: "Non-Profit",value: "nonprofit" },
+        ],
+        helpText: "Drives the required/disabled state of fields below.",
+      },
+      {
+        name: "companyName",
+        label: "Company Name",
+        type: FIELD_TYPES.TEXT,
+        placeholder: "Acme Inc.",
+        // Required only for business or non-profit accounts
+        requiredWhen: {
+          logic: "OR",
+          conditions: [
+            { field: "accountType", operator: "equals",  value: "business"  },
+            { field: "accountType", operator: "equals",  value: "nonprofit" },
+          ],
+        },
+        helpText: "Required for business / non-profit accounts.",
+      },
+      {
+        name: "taxId",
+        label: "Tax ID",
+        type: FIELD_TYPES.TEXT,
+        placeholder: "XX-XXXXXXX",
+        // Required for business, disabled for personal
+        requiredWhen: {
+          conditions: [{ field: "accountType", operator: "equals", value: "business" }],
+        },
+        disabledWhen: {
+          conditions: [{ field: "accountType", operator: "equals", value: "personal" }],
+        },
+        helpText: "Required for business. Disabled for personal accounts.",
+      },
+      {
+        name: "discountCode",
+        label: "Discount Code",
+        type: FIELD_TYPES.TEXT,
+        placeholder: "SAVE20",
+        // Disabled unless account is non-profit
+        disabledWhen: {
+          conditions: [{ field: "accountType", operator: "notEquals", value: "nonprofit" }],
+        },
+        helpText: "Only available for non-profit accounts.",
+      },
+    ] satisfies FormFieldSchema[],
+  },
+};
+
+// ─── dependsOn: string[] ──────────────────────────────────────────────────────
+
+export const MultiDependsOn: Story = {
+  name: "Async options — multi-field dependsOn",
+  args: {
+    columns: 1,
+    schema: [
+      {
+        name: "region",
+        label: "Region",
+        type: FIELD_TYPES.SELECT,
+        required: true,
+        options: [
+          { label: "North America", value: "na" },
+          { label: "Europe",        value: "eu" },
+          { label: "Asia-Pacific",  value: "apac" },
+        ],
+      },
+      {
+        name: "tier",
+        label: "Tier",
+        type: FIELD_TYPES.SELECT,
+        required: true,
+        options: [
+          { label: "Starter", value: "starter" },
+          { label: "Pro",     value: "pro"     },
+          { label: "Enterprise", value: "enterprise" },
+        ],
+      },
+      {
+        name: "dataCenter",
+        label: "Data Center",
+        type: FIELD_TYPES.SELECT,
+        required: true,
+        dependsOn: ["region", "tier"],
+        helpText: "Options are filtered by both Region and Tier. Select both fields above first.",
+        getOptions: ({ region, tier }: { region: string; tier: string }) => {
+          const map: Record<string, Record<string, { label: string; value: string }[]>> = {
+            na: {
+              starter:    [{ label: "US-East (shared)",   value: "us-e-shared" }],
+              pro:        [{ label: "US-East",             value: "us-e" }, { label: "US-West", value: "us-w" }],
+              enterprise: [{ label: "US-East (dedicated)", value: "us-e-ded"  }, { label: "US-West (dedicated)", value: "us-w-ded" }],
+            },
+            eu: {
+              starter:    [{ label: "EU-West (shared)",    value: "eu-w-shared" }],
+              pro:        [{ label: "EU-West",              value: "eu-w"  }, { label: "EU-Central", value: "eu-c" }],
+              enterprise: [{ label: "EU-West (dedicated)",  value: "eu-w-ded"   }],
+            },
+            apac: {
+              starter:    [{ label: "APAC (shared)",        value: "apac-shared" }],
+              pro:        [{ label: "APAC-Singapore",        value: "apac-sg" }],
+              enterprise: [{ label: "APAC-Singapore (dedicated)", value: "apac-sg-ded" }],
+            },
+          };
+          return new Promise((res) =>
+            setTimeout(() => res(map[region]?.[tier] ?? []), 400)
+          );
+        },
+      },
+    ] satisfies FormFieldSchema[],
+  },
+};
+
+// ─── Error summary + TypeScript generic ──────────────────────────────────────
+
+export const ErrorSummaryAndGeneric: Story = {
+  name: "Error summary + TypeScript generic",
+  args: {
+    columns: 1,
+    showErrorSummary: true,
+    errorSummaryTitle: "Please fix the following before submitting:",
+    mode: "onSubmit",
+    schema: [
+      {
+        name: "fullName",
+        label: "Full Name",
+        type: FIELD_TYPES.TEXT,
+        required: true,
+        validation: {
+          minLength: { value: 3, message: "Full name must be at least 3 characters" },
+        },
+      },
+      {
+        name: "email",
+        label: "Email",
+        type: FIELD_TYPES.EMAIL,
+        required: true,
+      },
+      {
+        name: "password",
+        label: "Password",
+        type: FIELD_TYPES.TEXT,
+        required: true,
+        validation: {
+          minLength: { value: 8, message: "Password must be at least 8 characters" },
+        },
+      },
+      {
+        name: "role",
+        label: "Role",
+        type: FIELD_TYPES.SELECT,
+        required: true,
+        options: [
+          { label: "Developer",   value: "dev" },
+          { label: "Designer",    value: "design" },
+          { label: "Manager",     value: "mgr" },
+        ],
+      },
+    ] satisfies FormFieldSchema[],
+  },
+};
+
+// ─── Option icons (radio + checkbox) ─────────────────────────────────────────
+
+export const OptionIcons: Story = {
+  name: "Option icons (radio + checkbox)",
+  args: {
+    columns: 1,
+    schema: [
+      {
+        name: "plan",
+        label: "Choose a plan",
+        type: FIELD_TYPES.RADIO,
+        required: true,
+        options: [
+          { label: "Free",       value: "free",       icon: "💸", helpText: "Up to 3 projects" },
+          { label: "Pro — $9/mo",value: "pro",        icon: "⚡", helpText: "Unlimited projects" },
+          { label: "Enterprise", value: "enterprise", icon: "🏢", helpText: "Custom SLA & support" },
+        ],
+      },
+      {
+        name: "features",
+        label: "Extra features",
+        type: FIELD_TYPES.CHECKBOX,
+        options: [
+          { label: "Analytics",    value: "analytics",    icon: "📊" },
+          { label: "CI/CD",        value: "cicd",         icon: "🔄" },
+          { label: "Custom domain",value: "domain",       icon: "🌐" },
+          { label: "Priority support", value: "support",  icon: "🎯" },
+        ],
+      },
+    ] satisfies FormFieldSchema[],
+  },
+};
+
 // ─── Full kitchen-sink form ───────────────────────────────────────────────────
 
 export const KitchenSink: Story = {
@@ -462,19 +927,19 @@ export const KitchenSink: Story = {
   args: {
     columns: 2,
     schema: [
-      { name: "first_name", label: "First Name", type: "text", required: true, placeholder: "Jane" },
-      { name: "last_name",  label: "Last Name",  type: "text", required: true, placeholder: "Smith" },
-      { name: "email",      label: "Email",       type: "email", required: true, placeholder: "jane@example.com", fullWidth: true },
-      { name: "dob",        label: "Date of Birth", type: "date" },
-      { name: "age",        label: "Age",          type: "number", min: 0, max: 120 },
-      { name: "bio",        label: "Bio",          type: "textarea", rows: 3, fullWidth: true, showWordCount: true },
-      { name: "plan",       label: "Plan",         type: "select", required: true, fullWidth: true, options: [
+      { name: "first_name", label: "First Name", type: FIELD_TYPES.TEXT, required: true, placeholder: "Jane" },
+      { name: "last_name",  label: "Last Name",  type: FIELD_TYPES.TEXT, required: true, placeholder: "Smith" },
+      { name: "email",      label: "Email",       type: FIELD_TYPES.EMAIL, required: true, placeholder: "jane@example.com", fullWidth: true },
+      { name: "dob",        label: "Date of Birth", type: FIELD_TYPES.DATE },
+      { name: "age",        label: "Age",          type: FIELD_TYPES.NUMBER, min: 0, max: 120 },
+      { name: "bio",        label: "Bio",          type: FIELD_TYPES.TEXTAREA, rows: 3, fullWidth: true, showWordCount: true },
+      { name: "plan",       label: "Plan",         type: FIELD_TYPES.SELECT, required: true, fullWidth: true, options: [
         { label: "Free", value: "free" },
         { label: "Pro", value: "pro" },
       ]},
-      { name: "satisfaction", label: "Satisfaction", type: "rating", starCount: 5, fullWidth: true },
-      { name: "avatar",     label: "Profile picture", type: "file", accept: "image/*", fullWidth: true },
-      { name: "terms",      label: "I accept the terms", type: "checkbox", required: true, fullWidth: true },
+      { name: "satisfaction", label: "Satisfaction", type: FIELD_TYPES.RATING, starCount: 5, fullWidth: true },
+      { name: "avatar",     label: "Profile picture", type: FIELD_TYPES.FILE, accept: "image/*", fullWidth: true },
+      { name: "terms",      label: "I accept the terms", type: FIELD_TYPES.CHECKBOX, required: true, fullWidth: true },
     ] satisfies FormFieldSchema[],
   },
 };

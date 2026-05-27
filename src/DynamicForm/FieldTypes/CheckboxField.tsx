@@ -31,7 +31,7 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = ({ field, name, err
     name,
     control,
     defaultValue: field.defaultValue ?? (isGroup ? [] : false),
-    rules: { required: field.required, validate: field.validation?.custom }
+    rules: { required: field.required, validate: field.validation?.validate ?? field.validation?.custom }
   });
 
   const handleDebounced = (value: any) => {
@@ -60,19 +60,22 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = ({ field, name, err
 
   const hasError = !!(error || controllerError);
 
-  const inputStyle = isUnstyled ? field.inputStyle : {
-    width: "16px", height: "16px", accentColor: "#004DB2",
-    cursor: field.disabled ? "not-allowed" : "pointer",
-    ...field.inputStyle
-  };
-  const labelStyle = field.labelStyle ?? (isUnstyled ? undefined : {
+  const inputStyle = isUnstyled
+    ? { ...theme.inputStyle, ...field.inputStyle }
+    : {
+        width: "16px", height: "16px", accentColor: "#004DB2",
+        cursor: field.disabled ? "not-allowed" : "pointer",
+        ...theme.inputStyle,
+        ...field.inputStyle
+      };
+  const labelStyle = field.labelStyle ?? theme.labelStyle ?? (isUnstyled ? undefined : {
     fontSize: "14px", color: isDarkMode ? "#e5e7eb" : "#333"
   });
-  const helpTextStyle = field.helpTextStyle ?? (isUnstyled ? undefined : {
-    fontSize: "12px", marginTop: "4px", color: isDarkMode ? "#9ca3af" : "#6b7280"
+  const helpTextStyle = field.helpTextStyle ?? theme.helpTextStyle ?? (isUnstyled ? undefined : {
+    fontSize: "12px", marginTop: "4px", color: isDarkMode ? "#9ca3af" : "#4b5563"
   });
-  const errorStyle = field.errorStyle ?? (isUnstyled ? undefined : { color: "#d93025", marginTop: "6px", fontSize: "13px" });
-  const wrapperStyle = field.wrapperStyle ?? (isUnstyled ? undefined : { marginBottom: "1rem" });
+  const errorStyle = field.errorStyle ?? theme.errorStyle ?? (isUnstyled ? undefined : { color: "#d93025", marginTop: "6px", fontSize: "13px" });
+  const wrapperStyle = field.wrapperStyle ?? theme.wrapperStyle ?? (isUnstyled ? undefined : { marginBottom: "1rem" });
   const checkBoxGroupStyle = field.checkBoxGroupStyle ?? (isUnstyled ? undefined : {
     display: "flex", flexDirection: "column" as const, gap: "0.75rem"
   });
@@ -99,7 +102,7 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = ({ field, name, err
       >
         {isGroup ? (
           loading ? (
-            <span style={isUnstyled ? undefined : { fontSize: "13px", color: "#6b7280" }}>
+            <span style={isUnstyled ? undefined : { fontSize: "13px", color: "#4b5563" }}>
               Loading options…
             </span>
           ) : fetchError ? (
@@ -127,12 +130,15 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = ({ field, name, err
                       checked={isChecked}
                       onChange={(e) => handleChange(e, opt.value)}
                       onBlur={() => { if (field.showErrorOnBlur) trigger(name); }}
-                      className={cx(theme.inputClass, field.inputClass)}
+                      className={cx(theme.checkboxInputClass ?? theme.inputClass, field.inputClass)}
                       style={inputStyle}
                       disabled={field.disabled || opt.disabled}
                       aria-describedby={opt.helpText ? `${inputId}-desc` : undefined}
                     />
-                    <span>{opt.label}</span>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      {opt.icon && <span style={{ flexShrink: 0 }}>{opt.icon}</span>}
+                      {opt.label}
+                    </span>
                   </label>
                   {opt.helpText && (
                     <div
@@ -155,7 +161,7 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = ({ field, name, err
             <input
               id={name}
               type="checkbox"
-              className={cx(theme.inputClass, field.inputClass)}
+              className={cx(theme.checkboxInputClass ?? theme.inputClass, field.inputClass)}
               style={inputStyle}
               checked={!!controllerField.value}
               onChange={(e) => handleChange(e)}

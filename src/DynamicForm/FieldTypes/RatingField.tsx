@@ -35,17 +35,17 @@ const RatingFieldComponent: React.FC<RatingFieldProps> = ({ field, name, error }
   const currentValue: number = controllerField.value ?? 0;
   const displayValue = hoverIndex >= 0 ? hoverIndex + 1 : currentValue;
 
-  const wrapperStyle = field.wrapperStyle ?? (isUnstyled ? undefined : { marginBottom: "1rem" });
-  const labelStyle = field.labelStyle ?? (isUnstyled ? undefined : {
+  const wrapperStyle = field.wrapperStyle ?? theme.wrapperStyle ?? (isUnstyled ? undefined : { marginBottom: "1rem" });
+  const labelStyle = field.labelStyle ?? theme.labelStyle ?? (isUnstyled ? undefined : {
     display: "flex", alignItems: "center", gap: "6px",
     marginBottom: "6px", fontWeight: 500, fontSize: "14px",
     color: isDarkMode ? "#e5e7eb" : "#333"
   });
-  const helpTextStyle = field.helpTextStyle ?? (isUnstyled ? undefined : {
+  const helpTextStyle = field.helpTextStyle ?? theme.helpTextStyle ?? (isUnstyled ? undefined : {
     fontSize: "12px", marginTop: "4px",
-    color: isDarkMode ? "#9ca3af" : "#6b7280"
+    color: isDarkMode ? "#9ca3af" : "#4b5563"
   });
-  const errorStyle = field.errorStyle ?? (isUnstyled ? undefined : { color: "#d93025", marginTop: "6px", fontSize: "13px" });
+  const errorStyle = field.errorStyle ?? theme.errorStyle ?? (isUnstyled ? undefined : { color: "#d93025", marginTop: "6px", fontSize: "13px" });
 
   const starsContainerStyle = isUnstyled
     ? undefined

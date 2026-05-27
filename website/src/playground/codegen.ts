@@ -39,6 +39,29 @@ function fieldToObject(f: FieldConfig, indent = 2): string {
   if (f.apiEndpoint) lines.push(s("apiEndpoint", f.apiEndpoint));
   if (f.dependsOn) lines.push(s("dependsOn", f.dependsOn));
 
+  if (f.subFields && f.subFields.length > 0) {
+    const itemSp = `${sp}    `;
+    const kvSp = `${sp}      `;
+    const subItems = f.subFields.map((sf) => {
+      const sfLines: string[] = [
+        `${kvSp}name: "${sf.name}",`,
+        `${kvSp}label: "${sf.label}",`,
+        `${kvSp}type: "${sf.type}",`,
+      ];
+      if (sf.required) sfLines.push(`${kvSp}required: true,`);
+      if (sf.placeholder) sfLines.push(`${kvSp}placeholder: "${sf.placeholder}",`);
+      if (sf.flex != null && sf.flex !== 1) sfLines.push(`${kvSp}flex: ${sf.flex},`);
+      if (sf.options && sf.options.length > 0) {
+        const opts = sf.options
+          .map((o) => `${kvSp}  { label: "${o.label}", value: "${o.value}" },`)
+          .join("\n");
+        sfLines.push(`${kvSp}options: [\n${opts}\n${kvSp}],`);
+      }
+      return `${itemSp}{\n${sfLines.join("\n")}\n${itemSp}}`;
+    }).join(",\n");
+    lines.push(`${sp}  multipleField: [\n${subItems},\n${sp}  ],`);
+  }
+
   if (f.validation && Object.keys(f.validation).length > 0) {
     const vSp = `${sp}    `;
     const vLines: string[] = [];
@@ -119,13 +142,44 @@ export function generateUsageCode(fields: FieldConfig[], columns = 1): string {
   ].join("\n");
 }
 
+// Produce a shareable JSON representation of the schema
+export function generateJsonCode(fields: FieldConfig[]): string {
+  const schema = toFormSchema(fields).map((f: any) => {
+    // RegExp can't be JSON-serialized — convert pattern to string
+    if (f.validation?.pattern?.value instanceof RegExp) {
+      return {
+        ...f,
+        validation: {
+          ...f.validation,
+          pattern: {
+            ...f.validation.pattern,
+            value: f.validation.pattern.value.source,
+          },
+        },
+      };
+    }
+    return f;
+  });
+  return JSON.stringify(schema, null, 2);
+}
+
 // Strip internal IDs to produce a clean FormFieldSchema[]
 export function toFormSchema(fields: FieldConfig[]) {
   return fields
     .filter((f) => f.name.trim() !== "")
-    .map(({ id: _id, condition, options, validation, ...rest }) => ({
+    .map(({ id: _id, condition, options, validation, subFields, ...rest }) => ({
       ...rest,
       ...(options ? { options: options.map(({ id: _oid, ...o }) => o) } : {}),
+      ...(subFields && subFields.length > 0
+        ? {
+            multipleField: subFields.map(({ id: _sid, options: sfOptions, ...sf }) => ({
+              ...sf,
+              ...(sfOptions && sfOptions.length > 0
+                ? { options: sfOptions.map(({ id: _oid, ...o }) => o) }
+                : {}),
+            })),
+          }
+        : {}),
       ...(validation && Object.keys(validation).length > 0
         ? {
             validation: {

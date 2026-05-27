@@ -24,7 +24,7 @@ const GroupFieldComponent: React.FC<GroupFieldProps> = ({ field, name, error }) 
   } = useController({
     name,
     control,
-    rules: { required: field.required, validate: field.validation?.custom },
+    rules: { required: field.required, validate: field.validation?.validate ?? field.validation?.custom },
     defaultValue: field.defaultValue ?? {}
   });
 
@@ -43,7 +43,7 @@ const GroupFieldComponent: React.FC<GroupFieldProps> = ({ field, name, error }) 
   });
   const errorStyle = field.errorStyle ?? (isUnstyled ? undefined : { color: "#d93025", marginTop: "6px", fontSize: "13px" });
   const helpTextStyle = field.helpTextStyle ?? (isUnstyled ? undefined : {
-    fontSize: "12px", marginTop: "4px", color: isDarkMode ? "#9ca3af" : "#6b7280"
+    fontSize: "12px", marginTop: "4px", color: isDarkMode ? "#9ca3af" : "#4b5563"
   });
 
   return (

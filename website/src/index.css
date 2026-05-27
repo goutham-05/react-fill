@@ -3,37 +3,52 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --scrollbar-track: #f3f4f6;
+    --scrollbar-thumb: #d1d5db;
+    --scrollbar-thumb-hover: #9ca3af;
+    --glass-bg: rgba(255, 255, 255, 0.88);
+    --glass-border: rgba(0, 0, 0, 0.08);
+    --grid-color: rgba(0, 0, 0, 0.06);
+  }
+
+  .dark {
+    --scrollbar-track: #18181b;
+    --scrollbar-thumb: #3f3f46;
+    --scrollbar-thumb-hover: #52525b;
+    --glass-bg: rgba(9, 9, 11, 0.85);
+    --glass-border: rgba(63, 63, 70, 0.4);
+    --grid-color: rgba(63, 63, 70, 0.15);
+  }
+
   * { box-sizing: border-box; }
 
   html { scroll-behavior: smooth; }
 
   body {
-    background-color: #09090b;
-    color: #fafafa;
+    background-color: #ffffff;
+    color: #111827;
     font-family: "Inter", system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
 
+  .dark body {
+    background-color: #09090b;
+    color: #fafafa;
+  }
+
   ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: #18181b; }
-  ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: #52525b; }
+  ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+  ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
 }
 
 @layer utilities {
-  .gradient-text {
-    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #60a5fa 100%);
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
   .glass {
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    background: rgba(9, 9, 11, 0.85);
-    border-bottom: 1px solid rgba(63, 63, 70, 0.4);
+    background: var(--glass-bg);
+    border-bottom: 1px solid var(--glass-border);
   }
 
   .glow-blue {
@@ -46,8 +61,8 @@
 
   .grid-bg {
     background-image:
-      linear-gradient(rgba(63, 63, 70, 0.15) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(63, 63, 70, 0.15) 1px, transparent 1px);
+      linear-gradient(var(--grid-color) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
     background-size: 40px 40px;
   }
 }

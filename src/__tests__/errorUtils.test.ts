@@ -1,11 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { getAutoErrorMessage, resolveErrorMessage } from "../DynamicForm/utils/errorUtils";
 import type { FormFieldSchema } from "../DynamicForm/types/FormFieldSchema";
+import { FIELD_TYPES } from "../DynamicForm/types/constant";
 
 const baseField: FormFieldSchema = {
   name: "email",
   label: "Email",
-  type: "text"
+  type: FIELD_TYPES.TEXT
 };
 
 describe("getAutoErrorMessage", () => {

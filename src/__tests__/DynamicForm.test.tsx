@@ -5,11 +5,12 @@ import { describe, it, expect, vi } from "vitest";
 import DynamicForm from "../DynamicForm/DynamicForm";
 import type { DynamicFormHandle } from "../DynamicForm/DynamicForm";
 import type { FormFieldSchema } from "../DynamicForm/types/FormFieldSchema";
+import { FIELD_TYPES } from "../DynamicForm/types/constant";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function textField(overrides?: Partial<FormFieldSchema>): FormFieldSchema {
-  return { name: "username", label: "Username", type: "text", ...overrides };
+  return { name: "username", label: "Username", type: FIELD_TYPES.TEXT, ...overrides };
 }
 
 // ─── Rendering ────────────────────────────────────────────────────────────────
@@ -179,7 +180,7 @@ describe("DynamicForm — field types", () => {
     render(
       <DynamicForm
         schema={[{
-          name: "country", label: "Country", type: "select",
+          name: "country", label: "Country", type: FIELD_TYPES.SELECT,
           options: [{ label: "USA", value: "us" }, { label: "UK", value: "uk" }]
         }]}
         onSubmit={vi.fn()}
@@ -192,7 +193,7 @@ describe("DynamicForm — field types", () => {
   it("renders textarea field", () => {
     render(
       <DynamicForm
-        schema={[{ name: "bio", label: "Bio", type: "textarea" }]}
+        schema={[{ name: "bio", label: "Bio", type: FIELD_TYPES.TEXTAREA }]}
         onSubmit={vi.fn()}
       />
     );
@@ -204,7 +205,7 @@ describe("DynamicForm — field types", () => {
     render(
       <DynamicForm
         schema={[{
-          name: "plan", label: "Plan", type: "radio",
+          name: "plan", label: "Plan", type: FIELD_TYPES.RADIO,
           options: [{ label: "Free", value: "free" }, { label: "Pro", value: "pro" }]
         }]}
         onSubmit={vi.fn()}
@@ -217,7 +218,7 @@ describe("DynamicForm — field types", () => {
   it("renders checkbox", () => {
     render(
       <DynamicForm
-        schema={[{ name: "agree", label: "Agree", type: "checkbox" }]}
+        schema={[{ name: "agree", label: "Agree", type: FIELD_TYPES.CHECKBOX }]}
         onSubmit={vi.fn()}
       />
     );
@@ -227,7 +228,7 @@ describe("DynamicForm — field types", () => {
   it("renders number field", () => {
     render(
       <DynamicForm
-        schema={[{ name: "age", label: "Age", type: "number" }]}
+        schema={[{ name: "age", label: "Age", type: FIELD_TYPES.NUMBER }]}
         onSubmit={vi.fn()}
       />
     );
@@ -238,8 +239,8 @@ describe("DynamicForm — field types", () => {
     render(
       <DynamicForm
         schema={[{
-          name: "address", label: "Address", type: "group",
-          children: [{ name: "city", label: "City", type: "text" }]
+          name: "address", label: "Address", type: FIELD_TYPES.GROUP,
+          children: [{ name: "city", label: "City", type: FIELD_TYPES.TEXT }]
         }]}
         onSubmit={vi.fn()}
       />
@@ -251,7 +252,7 @@ describe("DynamicForm — field types", () => {
   it("renders additionalEmail as an email input", () => {
     render(
       <DynamicForm
-        schema={[{ name: "extra", label: "Extra Email", type: "additionalEmail" }]}
+        schema={[{ name: "extra", label: "Extra Email", type: FIELD_TYPES.ADDITIONAL_EMAIL }]}
         onSubmit={vi.fn()}
       />
     );
@@ -263,11 +264,11 @@ describe("DynamicForm — field types", () => {
 
 describe("DynamicForm — visibleWhen", () => {
   const conditionalSchema: FormFieldSchema[] = [
-    { name: "showExtra", label: "Show Extra", type: "checkbox" },
+    { name: "showExtra", label: "Show Extra", type: FIELD_TYPES.CHECKBOX },
     {
       name: "extra",
       label: "Extra Field",
-      type: "text",
+      type: FIELD_TYPES.TEXT,
       visibleWhen: {
         conditions: [{ field: "showExtra", value: true, operator: "equals" }]
       }
@@ -319,12 +320,12 @@ describe("DynamicForm — visibleWhen", () => {
 
   it("supports OR logic: shows field when any condition is met", async () => {
     const schema: FormFieldSchema[] = [
-      { name: "a", label: "A", type: "checkbox" },
-      { name: "b", label: "B", type: "checkbox" },
+      { name: "a", label: "A", type: FIELD_TYPES.CHECKBOX },
+      { name: "b", label: "B", type: FIELD_TYPES.CHECKBOX },
       {
         name: "target",
         label: "Target",
-        type: "text",
+        type: FIELD_TYPES.TEXT,
         visibleWhen: {
           logic: "OR",
           conditions: [
@@ -355,7 +356,7 @@ describe("DynamicForm — inputFormatter", () => {
     };
     render(
       <DynamicForm
-        schema={[{ name: "phone", label: "Phone", type: "text", inputFormatter: phoneFormatter }]}
+        schema={[{ name: "phone", label: "Phone", type: FIELD_TYPES.TEXT, inputFormatter: phoneFormatter }]}
         onSubmit={vi.fn()}
       />
     );
@@ -369,7 +370,7 @@ describe("DynamicForm — inputFormatter", () => {
     const upper = (v: string) => v.toUpperCase();
     render(
       <DynamicForm
-        schema={[{ name: "code", label: "Code", type: "text", inputFormatter: upper }]}
+        schema={[{ name: "code", label: "Code", type: FIELD_TYPES.TEXT, inputFormatter: upper }]}
         onSubmit={onSubmit}
         mode="onChange"
       />
@@ -394,7 +395,7 @@ describe("DynamicForm — custom rendering", () => {
         schema={[{
           name: "custom",
           label: "Custom",
-          type: "text",
+          type: FIELD_TYPES.TEXT,
           render: () => <div data-testid="custom-render">Custom Content</div>
         }]}
         onSubmit={vi.fn()}
@@ -410,7 +411,7 @@ describe("DynamicForm — custom rendering", () => {
         schema={[{
           name: "ov",
           label: "Override",
-          type: "text",
+          type: FIELD_TYPES.TEXT,
           overrideComponent: MyComp
         }]}
         onSubmit={vi.fn()}
@@ -429,10 +430,10 @@ describe("DynamicForm — multiField", () => {
         schema={[{
           name: "nameRow",
           label: "Name Row",
-          type: "multiField",
+          type: FIELD_TYPES.MULTI_FIELD,
           multipleField: [
-            { name: "first", label: "First Name", type: "text" },
-            { name: "last", label: "Last Name", type: "text" }
+            { name: "first", label: "First Name", type: FIELD_TYPES.TEXT },
+            { name: "last", label: "Last Name", type: FIELD_TYPES.TEXT }
           ]
         }]}
         onSubmit={vi.fn()}
