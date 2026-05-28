@@ -16,7 +16,7 @@ env:
 
 jobs:
   test:
-    name: Test and build
+    name: Test package and build website
     runs-on: ubuntu-latest
 
     steps:
@@ -40,3 +40,11 @@ jobs:
 
       - name: Verify package contents
         run: npm pack --dry-run
+
+      - name: Install website dependencies
+        run: npm ci
+        working-directory: website
+
+      - name: Build website
+        run: npm run build
+        working-directory: website

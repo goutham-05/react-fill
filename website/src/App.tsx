@@ -6,6 +6,8 @@ import { parseShareToken, decodeState } from "./playground/shareUrl";
 import type { BuilderState } from "./playground/types";
 import { useTheme } from "./ThemeContext";
 
+const PACKAGE_VERSION = __PACKAGE_VERSION__;
+
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
 const GitHubIcon = () => (
@@ -26,6 +28,7 @@ function ThemeToggleButton() {
   const { theme, toggle } = useTheme();
   return (
     <button
+      type="button"
       onClick={toggle}
       title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
       className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-zinc-400 dark:hover:text-zinc-200 dark:hover:bg-zinc-800 transition-all"
@@ -66,6 +69,7 @@ function Navbar({ onPlayground, onDocs }: { onPlayground: () => void; onDocs: ()
 
         <div className="flex items-center gap-1 sm:gap-3">
           <button
+            type="button"
             onClick={onPlayground}
             className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md bg-blue-50 dark:bg-blue-600/15 hover:bg-blue-100 dark:hover:bg-blue-600/25 text-blue-700 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-200 border border-blue-200 dark:border-blue-500/25 transition-all"
           >
@@ -78,6 +82,7 @@ function Navbar({ onPlayground, onDocs }: { onPlayground: () => void; onDocs: ()
             Demo
           </a>
           <button
+            type="button"
             onClick={onDocs}
             className="hidden sm:block px-3 py-1.5 text-xs text-gray-500 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-zinc-100 rounded-md hover:bg-gray-100/60 dark:hover:bg-zinc-800/60 transition-all"
           >
@@ -92,7 +97,9 @@ function Navbar({ onPlayground, onDocs }: { onPlayground: () => void; onDocs: ()
             title="View on npm"
           >
             <NpmIcon />
-            <span className="text-xs text-gray-500 dark:text-zinc-400 font-mono">v1.0.0</span>
+            <span className="text-xs text-gray-500 dark:text-zinc-400 font-mono">
+              v{PACKAGE_VERSION}
+            </span>
           </a>
           <a
             href="https://github.com/goutham-05/react-fill"
@@ -120,6 +127,7 @@ function CopyButton({ text }: { text: string }) {
   };
   return (
     <button
+      type="button"
       onClick={copy}
       className="ml-3 px-3 py-1 text-xs rounded-md bg-gray-200 dark:bg-zinc-700 hover:bg-gray-300 dark:hover:bg-zinc-600 text-gray-700 dark:text-zinc-300 hover:text-white transition-all font-mono border border-gray-400/50 dark:border-zinc-600/50"
     >
@@ -139,7 +147,7 @@ function Hero({ onPlayground }: { onPlayground: () => void }) {
         {/* Badge */}
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 text-xs text-gray-500 dark:text-zinc-400 mb-8 animate-fade-in">
           <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-          v1.0.1 released — 114 tests passing
+          v{PACKAGE_VERSION} released, 114 tests passing
         </div>
 
         {/* Headline */}
@@ -187,6 +195,7 @@ function Hero({ onPlayground }: { onPlayground: () => void }) {
           style={{ animationDelay: "0.4s" }}
         >
           <button
+            type="button"
             onClick={onPlayground}
             className="px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition-colors flex items-center gap-2"
           >
@@ -432,6 +441,7 @@ function ThemeShowcase() {
           <div className="flex bg-gray-50/80 dark:bg-zinc-900/80 border-b border-gray-200 dark:border-zinc-800">
             {tabs.map((t) => (
               <button
+                type="button"
                 key={t.id}
                 onClick={() => setTab(t.id)}
                 className={[
@@ -661,6 +671,7 @@ function Footer({ onPlayground, onDocs }: { onPlayground: () => void; onDocs: ()
 
           <div className="flex items-center gap-6 text-xs text-gray-500 dark:text-zinc-500">
             <button
+              type="button"
               onClick={onPlayground}
               className="hover:text-blue-400 transition-colors flex items-center gap-1"
             >
@@ -692,6 +703,7 @@ function Footer({ onPlayground, onDocs }: { onPlayground: () => void; onDocs: ()
               Issues
             </a>
             <button
+              type="button"
               onClick={onDocs}
               className="hover:text-gray-700 dark:hover:text-zinc-300 transition-colors"
             >
