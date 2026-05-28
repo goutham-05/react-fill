@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/docs",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/examples",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/playground",
+      "destination": "/index.html"
+    }
+  ]
+}

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useSyncExternalStore } from "react";
 import Demo from "./components/Demo";
 import Docs from "./components/Docs";
+import Examples from "./components/Examples";
 import Playground from "./playground/Playground";
 import { parseShareToken, decodeState } from "./playground/shareUrl";
 import type { BuilderState } from "./playground/types";
@@ -48,7 +49,21 @@ function ThemeToggleButton() {
 
 // ─── Navbar ───────────────────────────────────────────────────────────────────
 
-function Navbar({ onPlayground, onDocs }: { onPlayground: () => void; onDocs: () => void }) {
+function Navbar({
+  activePage,
+  onHome,
+  onDemo,
+  onPlayground,
+  onDocs,
+  onExamples,
+}: {
+  activePage: "landing" | "playground" | "docs" | "examples";
+  onHome: () => void;
+  onDemo: () => void;
+  onPlayground: () => void;
+  onDocs: () => void;
+  onExamples: () => void;
+}) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -57,34 +72,59 @@ function Navbar({ onPlayground, onDocs }: { onPlayground: () => void; onDocs: ()
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const navItemClass = (isActive: boolean) =>
+    [
+      "hidden sm:block px-3 py-1.5 text-xs rounded-md transition-all",
+      isActive
+        ? "bg-blue-50 text-blue-700 font-semibold dark:bg-blue-600/15 dark:text-blue-300"
+        : "text-gray-500 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-gray-100/60 dark:hover:bg-zinc-800/60",
+    ].join(" ");
+
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "glass" : "bg-transparent"}`}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
+        <button
+          type="button"
+          onClick={onHome}
+          className="flex items-center gap-2.5 rounded-md transition-opacity hover:opacity-80"
+        >
           <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center text-white text-xs font-bold shadow-lg">
             ⬡
           </div>
           <span className="font-semibold text-sm text-gray-900 dark:text-zinc-100 font-mono">ReactFill</span>
-        </div>
+        </button>
 
         <div className="flex items-center gap-1 sm:gap-3">
           <button
             type="button"
             onClick={onPlayground}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md bg-blue-50 dark:bg-blue-600/15 hover:bg-blue-100 dark:hover:bg-blue-600/25 text-blue-700 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-200 border border-blue-200 dark:border-blue-500/25 transition-all"
+            className={[
+              "hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md border transition-all",
+              activePage === "playground"
+                ? "border-blue-300 bg-blue-100 text-blue-800 dark:border-blue-500/40 dark:bg-blue-600/25 dark:text-blue-200"
+                : "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-900 dark:border-blue-500/25 dark:bg-blue-600/15 dark:text-blue-300 dark:hover:bg-blue-600/25 dark:hover:text-blue-200",
+            ].join(" ")}
           >
             ✦ Playground
           </button>
-          <a
-            href="#demo"
-            className="hidden sm:block px-3 py-1.5 text-xs text-gray-500 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-zinc-100 rounded-md hover:bg-gray-100/60 dark:hover:bg-zinc-800/60 transition-all"
+          <button
+            type="button"
+            onClick={onDemo}
+            className={navItemClass(activePage === "landing")}
           >
             Demo
-          </a>
+          </button>
+          <button
+            type="button"
+            onClick={onExamples}
+            className={navItemClass(activePage === "examples")}
+          >
+            Examples
+          </button>
           <button
             type="button"
             onClick={onDocs}
-            className="hidden sm:block px-3 py-1.5 text-xs text-gray-500 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-zinc-100 rounded-md hover:bg-gray-100/60 dark:hover:bg-zinc-800/60 transition-all"
+            className={navItemClass(activePage === "docs")}
           >
             Docs
           </button>
@@ -136,7 +176,13 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
-function Hero({ onPlayground }: { onPlayground: () => void }) {
+function Hero({
+  onPlayground,
+  onExamples,
+}: {
+  onPlayground: () => void;
+  onExamples: () => void;
+}) {
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center px-4 pt-20 pb-16 overflow-hidden grid-bg">
       {/* Glow orbs */}
@@ -207,6 +253,13 @@ function Hero({ onPlayground }: { onPlayground: () => void }) {
           >
             See Demo ↓
           </a>
+          <button
+            type="button"
+            onClick={onExamples}
+            className="px-6 py-2.5 rounded-lg bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-300 hover:text-white text-sm font-semibold transition-all border border-gray-300/60 dark:border-zinc-700/60"
+          >
+            Examples
+          </button>
           <a
             href="https://github.com/goutham-05/react-fill"
             target="_blank"
@@ -654,7 +707,15 @@ function HowItWorks() {
 
 // ─── Footer ───────────────────────────────────────────────────────────────────
 
-function Footer({ onPlayground, onDocs }: { onPlayground: () => void; onDocs: () => void }) {
+function Footer({
+  onPlayground,
+  onDocs,
+  onExamples,
+}: {
+  onPlayground: () => void;
+  onDocs: () => void;
+  onExamples: () => void;
+}) {
   return (
     <footer className="border-t border-gray-200/60 dark:border-zinc-800/60 py-12 px-4">
       <div className="max-w-6xl mx-auto">
@@ -676,6 +737,13 @@ function Footer({ onPlayground, onDocs }: { onPlayground: () => void; onDocs: ()
               className="hover:text-blue-400 transition-colors flex items-center gap-1"
             >
               ✦ Playground
+            </button>
+            <button
+              type="button"
+              onClick={onExamples}
+              className="hover:text-gray-700 dark:hover:text-zinc-300 transition-colors"
+            >
+              Examples
             </button>
             <a
               href="https://github.com/goutham-05/react-fill"
@@ -739,16 +807,43 @@ function isDocsHash(hash: string) {
   return hash === "#docs";
 }
 
-function hashToPage(hash: string): "landing" | "playground" | "docs" {
-  if (isPlaygroundHash(hash)) return "playground";
-  if (isDocsHash(hash)) return "docs";
+function isExamplesHash(hash: string) {
+  return hash === "#examples";
+}
+
+function pathToPage(pathname: string, hash: string): "landing" | "playground" | "docs" | "examples" {
+  if (pathname === "/playground" || isPlaygroundHash(hash)) return "playground";
+  if (pathname === "/docs" || isDocsHash(hash)) return "docs";
+  if (pathname === "/examples" || isExamplesHash(hash)) return "examples";
   return "landing";
 }
 
+function locationSnapshotToPage(snapshot: string): "landing" | "playground" | "docs" | "examples" {
+  const [pathname, hash = ""] = snapshot.split("#");
+  return pathToPage(pathname || "/", hash ? `#${hash}` : "");
+}
+
+function subscribeToLocationChange(callback: () => void) {
+  window.addEventListener("hashchange", callback);
+  window.addEventListener("popstate", callback);
+  return () => {
+    window.removeEventListener("hashchange", callback);
+    window.removeEventListener("popstate", callback);
+  };
+}
+
+function getLocationSnapshot() {
+  return `${window.location.pathname}${window.location.hash}`;
+}
+
+function navigateTo(path: string) {
+  window.history.pushState(null, "", path);
+  window.dispatchEvent(new PopStateEvent("popstate"));
+}
+
 export default function App() {
-  const [page, setPage] = useState<"landing" | "playground" | "docs">(
-    () => hashToPage(window.location.hash)
-  );
+  const locationSnapshot = useSyncExternalStore(subscribeToLocationChange, getLocationSnapshot, () => "/");
+  const page = locationSnapshotToPage(locationSnapshot);
 
   // Parse shared state from URL on initial load
   const [sharedState] = useState<Partial<BuilderState> | null>(() => {
@@ -757,48 +852,84 @@ export default function App() {
   });
 
   const goPlayground = () => {
-    window.location.hash = "playground";
-    setPage("playground");
+    navigateTo("/playground");
     window.scrollTo(0, 0);
   };
 
   const goLanding = () => {
-    window.location.hash = "";
-    setPage("landing");
+    navigateTo("/");
     window.scrollTo(0, 0);
+  };
+
+  const goDemo = () => {
+    navigateTo("/");
+    window.setTimeout(() => {
+      document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" });
+    }, 0);
   };
 
   const goDocs = () => {
-    window.location.hash = "docs";
-    setPage("docs");
+    navigateTo("/docs");
     window.scrollTo(0, 0);
   };
 
-  useEffect(() => {
-    const onHashChange = () => {
-      setPage(hashToPage(window.location.hash));
-    };
-    window.addEventListener("hashchange", onHashChange);
-    return () => window.removeEventListener("hashchange", onHashChange);
-  }, []);
+  const goExamples = () => {
+    navigateTo("/examples");
+    window.scrollTo(0, 0);
+  };
 
   if (page === "playground") {
     return <Playground onBack={goLanding} initialState={sharedState} />;
   }
 
   if (page === "docs") {
-    return <Docs onBack={goLanding} />;
+    return (
+      <div className="bg-white dark:bg-[#09090b] text-gray-900 dark:text-zinc-100 font-sans min-h-screen">
+        <Navbar
+          activePage={page}
+          onHome={goLanding}
+          onDemo={goDemo}
+          onPlayground={goPlayground}
+          onDocs={goDocs}
+          onExamples={goExamples}
+        />
+        <Docs />
+      </div>
+    );
+  }
+
+  if (page === "examples") {
+    return (
+      <div className="bg-white dark:bg-[#09090b] text-gray-900 dark:text-zinc-100 font-sans min-h-screen">
+        <Navbar
+          activePage={page}
+          onHome={goLanding}
+          onDemo={goDemo}
+          onPlayground={goPlayground}
+          onDocs={goDocs}
+          onExamples={goExamples}
+        />
+        <Examples />
+      </div>
+    );
   }
 
   return (
     <div className="bg-white dark:bg-[#09090b] text-gray-900 dark:text-zinc-100 font-sans min-h-screen">
-      <Navbar onPlayground={goPlayground} onDocs={goDocs} />
-      <Hero onPlayground={goPlayground} />
+      <Navbar
+        activePage={page}
+        onHome={goLanding}
+        onDemo={goDemo}
+        onPlayground={goPlayground}
+        onDocs={goDocs}
+        onExamples={goExamples}
+      />
+      <Hero onPlayground={goPlayground} onExamples={goExamples} />
       <Features />
       <Demo />
       <ThemeShowcase />
       <HowItWorks />
-      <Footer onPlayground={goPlayground} onDocs={goDocs} />
+      <Footer onPlayground={goPlayground} onDocs={goDocs} onExamples={goExamples} />
     </div>
   );
 }

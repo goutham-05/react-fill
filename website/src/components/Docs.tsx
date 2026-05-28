@@ -1,12 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useTheme } from "../ThemeContext";
-
-// ─── Props ────────────────────────────────────────────────────────────────────
-
-export interface DocsProps {
-  onBack: () => void;
-}
-
 // ─── Syntax highlighting (copied from App.tsx — not imported to keep Docs self-contained) ──
 
 function tokenize(line: string): { text: string; cls: string }[] {
@@ -99,6 +91,7 @@ function CodeBlock({ code, label }: { code: string; label?: string }) {
         <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-zinc-800 bg-gray-50/60 dark:bg-zinc-900/60">
           <span className="text-[10px] font-mono text-gray-500 dark:text-zinc-500 uppercase tracking-widest">{label}</span>
           <button
+            type="button"
             onClick={copy}
             className="text-[10px] font-mono text-gray-500 dark:text-zinc-600 hover:text-gray-700 dark:hover:text-zinc-300 transition-colors px-2 py-0.5 rounded bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 border border-gray-300 dark:border-zinc-700"
           >
@@ -108,6 +101,7 @@ function CodeBlock({ code, label }: { code: string; label?: string }) {
       )}
       {!label && (
         <button
+          type="button"
           onClick={copy}
           className="absolute top-3 right-3 text-[10px] font-mono text-gray-500 dark:text-zinc-600 hover:text-gray-700 dark:hover:text-zinc-300 transition-colors px-2 py-0.5 rounded bg-gray-100/80 dark:bg-zinc-800/80 hover:bg-gray-200 dark:hover:bg-zinc-700 border border-gray-300 dark:border-zinc-700 opacity-0 group-hover:opacity-100"
         >
@@ -125,6 +119,7 @@ function CopyButton({ code }: { code: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <button
+      type="button"
       onClick={() => { navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
       className="text-[10px] font-mono text-gray-500 dark:text-zinc-600 hover:text-gray-700 dark:hover:text-zinc-300 transition-colors px-2 py-0.5 rounded bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 border border-gray-300 dark:border-zinc-700"
     >
@@ -925,27 +920,6 @@ const TOC_ITEMS = [
 
 // ─── Theme Toggle Button ──────────────────────────────────────────────────────
 
-function ThemeToggleButton() {
-  const { theme, toggle } = useTheme();
-  return (
-    <button
-      onClick={toggle}
-      title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-      className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-zinc-400 dark:hover:text-zinc-200 dark:hover:bg-zinc-800 transition-all"
-    >
-      {theme === "dark" ? (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-          <path d="M12 2.25a.75.75 0 0 1 .75.75v2.25a.75.75 0 0 1-1.5 0V3a.75.75 0 0 1 .75-.75ZM7.5 12a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM18.894 6.166a.75.75 0 0 0-1.06-1.06l-1.591 1.59a.75.75 0 1 0 1.06 1.061l1.591-1.59ZM21.75 12a.75.75 0 0 1-.75.75h-2.25a.75.75 0 0 1 0-1.5H21a.75.75 0 0 1 .75.75ZM17.834 18.894a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 1 0-1.061 1.06l1.59 1.591ZM12 18a.75.75 0 0 1 .75.75V21a.75.75 0 0 1-1.5 0v-2.25A.75.75 0 0 1 12 18ZM7.758 17.303a.75.75 0 0 0-1.061-1.06l-1.591 1.59a.75.75 0 0 0 1.06 1.061l1.591-1.59ZM6 12a.75.75 0 0 1-.75.75H3a.75.75 0 0 1 0-1.5h2.25A.75.75 0 0 1 6 12ZM6.697 7.757a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 0 0-1.061 1.06l1.59 1.591Z" />
-        </svg>
-      ) : (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-          <path fillRule="evenodd" d="M9.528 1.718a.75.75 0 0 1 .162.819A8.97 8.97 0 0 0 9 6a9 9 0 0 0 9 9 8.97 8.97 0 0 0 3.463-.69.75.75 0 0 1 .981.98 10.503 10.503 0 0 1-9.694 6.46c-5.799 0-10.5-4.7-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 0 1 .818.162Z" clipRule="evenodd" />
-        </svg>
-      )}
-    </button>
-  );
-}
-
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 
 function Sidebar({ activeId }: { activeId: string }) {
@@ -976,7 +950,7 @@ function Sidebar({ activeId }: { activeId: string }) {
 
 // ─── Docs ─────────────────────────────────────────────────────────────────────
 
-export default function Docs({ onBack }: DocsProps) {
+export default function Docs() {
   const [activeId, setActiveId] = useState(TOC_ITEMS[0].id);
   const [selectedFieldType, setSelectedFieldType] = useState<string>("text");
   const mainRef = useRef<HTMLDivElement>(null);
@@ -1004,30 +978,7 @@ export default function Docs({ onBack }: DocsProps) {
   }, []);
 
   return (
-    <div className="bg-white dark:bg-zinc-950 text-gray-900 dark:text-zinc-100 font-sans min-h-screen flex flex-col">
-      {/* ─ Top bar ─ */}
-      <header className="sticky top-0 z-40 flex items-center gap-4 px-4 sm:px-6 h-14 border-b border-gray-200/60 dark:border-zinc-800/60 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm flex-shrink-0">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-100 transition-colors group"
-        >
-          <span className="group-hover:-translate-x-0.5 transition-transform">←</span>
-          <span>Back</span>
-        </button>
-        <div className="w-px h-5 bg-gray-200 dark:bg-zinc-800" />
-        <span className="text-sm font-semibold text-gray-900 dark:text-zinc-100">Documentation</span>
-        <div className="flex-1" />
-        <a
-          href="https://github.com/goutham-05/react-fill"
-          target="_blank"
-          rel="noreferrer"
-          className="text-xs text-gray-500 dark:text-zinc-500 hover:text-gray-700 dark:hover:text-zinc-300 transition-colors hidden sm:block"
-        >
-          GitHub →
-        </a>
-        <ThemeToggleButton />
-      </header>
-
+    <div className="bg-white dark:bg-zinc-950 text-gray-900 dark:text-zinc-100 font-sans min-h-screen flex flex-col pt-14">
       {/* ─ Mobile chips row ─ */}
       <div className="sm:hidden flex items-center gap-2 overflow-x-auto px-4 py-2.5 border-b border-gray-200/60 dark:border-zinc-800/60 bg-gray-50/40 dark:bg-zinc-900/40 flex-shrink-0 scrollbar-none">
         {TOC_ITEMS.map((item) => (
