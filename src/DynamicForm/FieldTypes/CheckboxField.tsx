@@ -61,10 +61,11 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = ({ field, name, err
   const hasError = !!(error || controllerError);
 
   const inputStyle = isUnstyled
-    ? { ...theme.inputStyle, ...field.inputStyle }
+    ? { outline: "none", ...theme.inputStyle, ...field.inputStyle }
     : {
         width: "16px", height: "16px", accentColor: "#004DB2",
         cursor: field.disabled ? "not-allowed" : "pointer",
+        outline: "none",
         ...theme.inputStyle,
         ...field.inputStyle
       };
@@ -130,7 +131,7 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = ({ field, name, err
                       checked={isChecked}
                       onChange={(e) => handleChange(e, opt.value)}
                       onBlur={() => { if (field.showErrorOnBlur) trigger(name); }}
-                      className={cx(theme.checkboxInputClass ?? theme.inputClass, field.inputClass)}
+                      className={cx(theme.checkboxInputClass, field.inputClass)}
                       style={inputStyle}
                       disabled={field.disabled || opt.disabled}
                       aria-describedby={opt.helpText ? `${inputId}-desc` : undefined}
@@ -161,7 +162,7 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldProps> = ({ field, name, err
             <input
               id={name}
               type="checkbox"
-              className={cx(theme.checkboxInputClass ?? theme.inputClass, field.inputClass)}
+              className={cx(theme.checkboxInputClass, field.inputClass)}
               style={inputStyle}
               checked={!!controllerField.value}
               onChange={(e) => handleChange(e)}

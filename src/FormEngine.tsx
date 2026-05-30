@@ -48,15 +48,15 @@ const BaseFieldRenderer: React.FC<Props> = ({ field, parentName }) => {
   const error = resolveNestedValue(formState.errors, qualifiedFieldName);
 
   // Collect every unique field path needed by ALL condition configs (visible/required/disabled).
-  // useMemo with [] deps: schema is static — condition paths never change after mount.
+  // Depends on the three condition configs so dynamic schemas (e.g. playground builder) are
+  // handled correctly when conditions are added or changed after the field first mounts.
   const allConditionPaths = useMemo(() => {
     const paths = new Set<string>();
     field.visibleWhen?.conditions?.forEach(c => paths.add(c.field));
     field.requiredWhen?.conditions?.forEach(c => paths.add(c.field));
     field.disabledWhen?.conditions?.forEach(c => paths.add(c.field));
     return Array.from(paths);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [field.visibleWhen, field.requiredWhen, field.disabledWhen]);
 
   // Single useWatch covers all three condition sets — zero duplicate subscriptions.
   const watchedValues = useWatch({ control, name: allConditionPaths }) as unknown[];
@@ -64,8 +64,7 @@ const BaseFieldRenderer: React.FC<Props> = ({ field, parentName }) => {
   // Build a path→value lookup map.
   const watchedMap = useMemo(
     () => Object.fromEntries(allConditionPaths.map((p, i) => [p, watchedValues[i]])),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [watchedValues]
+    [allConditionPaths, watchedValues]
   );
 
   const shouldRenderField = field.visibleWhen?.conditions?.length

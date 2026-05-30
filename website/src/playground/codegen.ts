@@ -167,7 +167,7 @@ export function generateJsonCode(fields: FieldConfig[]): string {
 export function toFormSchema(fields: FieldConfig[]) {
   return fields
     .filter((f) => f.name.trim() !== "")
-    .map(({ id: _id, condition, options, validation, subFields, ...rest }) => ({
+    .map(({ id: _id, condition, options, validation, subFields, children, ...rest }) => ({
       ...rest,
       ...(options ? { options: options.map(({ id: _oid, ...o }) => o) } : {}),
       ...(subFields && subFields.length > 0
@@ -179,6 +179,9 @@ export function toFormSchema(fields: FieldConfig[]) {
                 : {}),
             })),
           }
+        : {}),
+      ...(children && children.length > 0
+        ? { children: toFormSchema(children as FieldConfig[]) }
         : {}),
       ...(validation && Object.keys(validation).length > 0
         ? {

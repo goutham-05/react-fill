@@ -59,7 +59,7 @@ const RadioFieldComponent: React.FC<RadioFieldProps> = ({ field, name, error }) 
   const radioInputStyle = {
     width: "16px", height: "16px", accentColor: "#004DB2",
     cursor: field.disabled ? "not-allowed" : "pointer",
-    transition: "all 0.2s ease",
+    outline: "none",
     ...theme.inputStyle,
     ...field.inputStyle
   };
@@ -108,8 +108,8 @@ const RadioFieldComponent: React.FC<RadioFieldProps> = ({ field, name, error }) 
                   checked={isSelected}
                   onChange={(e) => handleChange(e.target.value, e)}
                   onBlur={() => { if (field.showErrorOnBlur) trigger(name); }}
-                  className={cx(theme.radioInputClass ?? theme.inputClass, field.inputClass)}
-                  style={isUnstyled ? { ...theme.inputStyle, ...field.inputStyle } : radioInputStyle}
+                  className={cx(theme.radioInputClass, field.inputClass)}
+                  style={isUnstyled ? { outline: "none", ...theme.inputStyle, ...field.inputStyle } : radioInputStyle}
                   disabled={field.disabled || option.disabled}
                   aria-describedby={option.helpText ? `${inputId}-desc` : undefined}
                 />

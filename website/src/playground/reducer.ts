@@ -63,6 +63,11 @@ export function builderReducer(state: BuilderState, action: BuilderAction): Buil
         id: uid(),
         name: field.name + "_copy",
         options: field.options?.map((o) => ({ ...o, id: uid() })),
+        subFields: field.subFields?.map((sf) => ({
+          ...sf,
+          id: uid(),
+          options: sf.options?.map((o) => ({ ...o, id: uid() })),
+        })),
       };
       const idx = state.fields.findIndex((f) => f.id === action.id);
       const fields = [...state.fields];

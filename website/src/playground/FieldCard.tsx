@@ -281,7 +281,7 @@ function ConditionEditor({
 // ─── SubFieldEditor ───────────────────────────────────────────────────────────
 
 const SUB_FIELD_TYPES: SubFieldType[] = [
-  "text", "email", "number", "textarea", "select", "radio", "checkbox", "date", "file", "slider", "rating",
+  "text", "email", "number", "textarea", "select", "radio", "checkbox", "date", "time", "datetime", "file", "slider", "rating",
 ];
 
 const subInputCls =
@@ -313,7 +313,7 @@ function SubFieldEditor({
   const removeSub = (id: string) =>
     onChange(subFields.filter((sf) => sf.id !== id));
 
-  const noPlaceholder = ["checkbox", "radio", "date", "file", "slider", "rating"];
+  const noPlaceholder = ["checkbox", "radio", "date", "time", "datetime", "file", "slider", "rating"];
   const hasOptions = ["select", "radio", "checkbox"];
 
   return (
@@ -572,7 +572,7 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
           </div>
 
           {/* Placeholder */}
-          {!["checkbox", "radio", "group", "date", "file", "slider", "rating", "fieldArray", "multiField"].includes(field.type) && (
+          {!["checkbox", "radio", "group", "date", "time", "datetime", "file", "slider", "rating", "fieldArray", "multiField"].includes(field.type) && (
             <div>
               <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-zinc-600 mb-1.5 block">
                 Placeholder
@@ -716,7 +716,7 @@ export default function FieldCard({ field, isSelected, allFields, columns, dispa
           )}
 
           {/* Options editor — static / API toggle for select, radio, checkbox-group */}
-          {(field.type === "select" || field.type === "radio" || field.type === "checkbox") && (() => {
+          {(field.type === "select" || field.type === "multiselect" || field.type === "radio" || field.type === "checkbox") && (() => {
             const optionsMode = field.apiEndpoint !== undefined ? "api" : "static";
             const otherFields = allFields.filter((f) => f.id !== field.id);
             return (
