@@ -966,8 +966,8 @@ Issues and pull requests are welcome. Please open an issue first for significant
 git clone https://github.com/goutham-05/react-fill
 cd react-fill
 npm install
-npm test        # vitest — 78 tests
-npm run build   # tsup — ESM + CJS + .d.ts
+npm test        # vitest — 114 tests
+npm run build   # tsup — ESM + CJS + .d.ts + .d.cts
 ```
 
 ---
