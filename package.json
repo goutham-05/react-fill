@@ -1,6 +1,6 @@
 {
   "name": "@oqlet/react-fill",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "ReactFill — a schema-driven dynamic form builder for React. CSS-framework agnostic, zero boilerplate.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
