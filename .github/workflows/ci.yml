@@ -105,9 +105,18 @@ jobs:
       - name: Build package
         run: npm run build
 
+      - name: Sync README with real test count and build output
+        run: |
+          # Capture actual test count from vitest output
+          TEST_COUNT=$(npm test 2>&1 | grep -oP 'Tests\s+\K[0-9]+(?= passed)')
+          # Update the test count line in README
+          sed -i "s/vitest — [0-9]* tests/vitest — ${TEST_COUNT} tests/" README.md
+          # Ensure build output line always reflects what tsup actually emits
+          sed -i "s|tsup — .*|tsup — ESM + CJS + .d.ts + .d.cts|" README.md
+
       - name: Commit version bump and push tag
         run: |
-          git add package.json package-lock.json
+          git add package.json package-lock.json README.md
           git commit -m "chore: release v${{ steps.version.outputs.version }} [skip ci]"
           git tag "v${{ steps.version.outputs.version }}"
           git push origin main --follow-tags
