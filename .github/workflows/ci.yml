@@ -17,6 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    outputs:
+      test_count: ${{ steps.test_count.outputs.count }}
 
     steps:
       - name: Checkout
@@ -32,7 +34,12 @@ jobs:
         run: npm ci
 
       - name: Run tests
-        run: npm test
+        id: test_count
+        run: |
+          OUTPUT=$(npm test 2>&1)
+          echo "$OUTPUT"
+          COUNT=$(echo "$OUTPUT" | grep -E '^\s*Tests\s+[0-9]+ passed' | grep -oE '[0-9]+' | head -1)
+          echo "count=${COUNT}" >> $GITHUB_OUTPUT
 
       - name: Build package
         run: npm run build
@@ -105,13 +112,10 @@ jobs:
       - name: Build package
         run: npm run build
 
-      - name: Sync README with real test count and build output
+      - name: Sync README with test count and build output
         run: |
-          # Capture actual test count from vitest output
-          TEST_COUNT=$(npm test 2>&1 | grep -oP 'Tests\s+\K[0-9]+(?= passed)')
-          # Update the test count line in README
-          sed -i "s/vitest — [0-9]* tests/vitest — ${TEST_COUNT} tests/" README.md
-          # Ensure build output line always reflects what tsup actually emits
+          TEST_COUNT="${{ needs.test.outputs.test_count }}"
+          [ -n "$TEST_COUNT" ] && sed -i "s/vitest — [0-9]* tests/vitest — ${TEST_COUNT} tests/" README.md
           sed -i "s|tsup — .*|tsup — ESM + CJS + .d.ts + .d.cts|" README.md
 
       - name: Commit version bump and push tag
